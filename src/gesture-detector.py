@@ -12,7 +12,9 @@ DEFAULT_MIN_TRACKING_CONFIDENCE = 0.80
 FULL_CONFIDENCE = 1.0
 FIST_GESTURE = "fist"
 OPEN_PALM_GESTURE = "open-palm"
+POINTING_GESTURE = "pointing"
 WRIST_LANDMARK_INDEX = 0
+INDEX_FINGER_INDEX = 1
 FINGER_LANDMARK_PAIRS = (
     (3, 4),
     (6, 8),
@@ -71,9 +73,13 @@ def classifyHandLandmarks(
         if areAllFingersFolded(landmarks):
             return FIST_GESTURE, FULL_CONFIDENCE
 
-        return None
+        if areOnlyFingersExtended(landmarks, {INDEX_FINGER_INDEX}):
+            return POINTING_GESTURE, FULL_CONFIDENCE
 
-    return OPEN_PALM_GESTURE, FULL_CONFIDENCE
+    else:
+        return OPEN_PALM_GESTURE, FULL_CONFIDENCE
+
+    return None
 
 
 def areAllFingersExtended(landmarks: list[Any]) -> bool:
@@ -97,6 +103,23 @@ def areAllFingersFolded(landmarks: list[Any]) -> bool:
     return all(
         not isFingerExtended(landmarks, wrist, jointIndex, tipIndex)
         for jointIndex, tipIndex in FINGER_LANDMARK_PAIRS
+    )
+
+
+def areOnlyFingersExtended(
+    landmarks: list[Any], extendedFingerIndices: set[int]
+) -> bool:
+    """Return whether exactly the selected fingers extend."""
+    if len(landmarks) <= FINGER_LANDMARK_PAIRS[-1][1]:
+        return False
+
+    wrist = landmarks[WRIST_LANDMARK_INDEX]
+    return all(
+        isFingerExtended(landmarks, wrist, jointIndex, tipIndex)
+        == (fingerIndex in extendedFingerIndices)
+        for fingerIndex, (jointIndex, tipIndex) in enumerate(
+            FINGER_LANDMARK_PAIRS
+        )
     )
 
 
