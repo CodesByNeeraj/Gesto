@@ -69,6 +69,7 @@ class DetectionLoop:
 
         self.executeAction(action)
         self.lastTriggeredAt[gestureLabel] = self.timeProvider()
+        self.gestureDetector.resetTracking()
         if self.onActionExecuted is not None:
             self.onActionExecuted(gestureLabel, action)
         return True

@@ -36,8 +36,16 @@ class GestureDetector:
             [list[Any]], tuple[str, float] | None
         ] | None = None,
         timestampProvider: Callable[[], int] | None = None,
+        recognizerFactory: Callable[[], Any] | None = None,
     ) -> None:
-        self.recognizer = recognizer or createGestureRecognizer()
+        self.recognizerFactory = recognizerFactory
+        if recognizer is None:
+            self.recognizerFactory = (
+                recognizerFactory or createGestureRecognizer
+            )
+            self.recognizer = self.recognizerFactory()
+        else:
+            self.recognizer = recognizer
         self.imageFactory = imageFactory or createMediaPipeImage
         self.customGestureDetector = (
             customGestureDetector or createCustomGestureDetector()
@@ -89,6 +97,15 @@ class GestureDetector:
             self.lastTimestampMilliseconds + 1,
         )
         return self.lastTimestampMilliseconds
+
+    def resetTracking(self) -> None:
+        """Reset video tracking before evaluating the next gesture."""
+        self.lastTimestampMilliseconds = -1
+        if self.recognizerFactory is None:
+            return
+
+        self.recognizer.close()
+        self.recognizer = self.recognizerFactory()
 
 
 def createGestureRecognizer() -> Any:

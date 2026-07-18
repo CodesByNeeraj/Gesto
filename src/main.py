@@ -2,7 +2,6 @@
 
 import importlib.util
 import threading
-import time
 from pathlib import Path
 from types import ModuleType
 
@@ -31,7 +30,6 @@ class GestoApplication:
         self.actionExecutor = executorModule.ActionExecutor()
         self.statusLock = threading.Lock()
         self.detectionStatus = "Ready to start detection"
-        self.lastActionStatusAt = 0.0
         self.detectionLoop = loopModule.DetectionLoop(
             self.cameraHandler,
             self.gestureDetector,
@@ -73,7 +71,6 @@ class GestoApplication:
         self.stopEvent.clear()
         with self.statusLock:
             self.detectionStatus = "Waiting for a recognized gesture"
-            self.lastActionStatusAt = 0.0
         self.detectionThread = threading.Thread(
             target=self.runDetectionLoop,
             daemon=True,
@@ -102,8 +99,6 @@ class GestoApplication:
     ) -> None:
         """Store the latest gesture for the settings-window status area."""
         with self.statusLock:
-            if time.monotonic() - self.lastActionStatusAt < 2:
-                return
             self.detectionStatus = (
                 f"Detected {gestureLabel} at {confidenceScore:.0%} confidence"
             )
@@ -114,7 +109,6 @@ class GestoApplication:
         """Display the action that was actually executed for a short period."""
         actionName = str(action["action"]).replace("-", " ")
         with self.statusLock:
-            self.lastActionStatusAt = time.monotonic()
             self.detectionStatus = (
                 f"Triggered {actionName} with {gestureLabel}"
             )

@@ -86,6 +86,23 @@ def test_detectGestureUsesCustomModelWhenNoBuiltInGestureMatches() -> None:
     customDetector.assert_called_once_with(landmarks)
 
 
+def test_resetTrackingRecreatesTheVideoRecognizer() -> None:
+    recognizer = Mock()
+    recognizerFactory = Mock(return_value=Mock())
+    detector = gestureDetector.GestureDetector(
+        recognizer,
+        lambda image: image,
+        recognizerFactory=recognizerFactory,
+    )
+    detector.lastTimestampMilliseconds = 100
+
+    detector.resetTracking()
+
+    recognizer.close.assert_called_once_with()
+    recognizerFactory.assert_called_once_with()
+    assert detector.lastTimestampMilliseconds == -1
+
+
 def createGestureResult(label: str, score: float) -> SimpleNamespace:
     category = SimpleNamespace(category_name=label, score=score)
     return SimpleNamespace(gestures=[[category]])
