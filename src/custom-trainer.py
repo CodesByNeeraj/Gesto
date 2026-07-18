@@ -13,6 +13,7 @@ MIN_CUSTOM_GESTURE_SAMPLES = 20
 DEFAULT_NEIGHBORS = 3
 LANDMARK_COUNT = 21
 MIN_DISTANCE_THRESHOLD = 0.05
+SIMILARITY_DISTANCE_MULTIPLIER = 2.0
 
 
 def trainCustomGesture(
@@ -36,7 +37,7 @@ def trainCustomGesture(
     classifier.fit(normalizedSamples, [gestureLabel] * len(normalizedSamples))
 
     sampleMatrix = np.array(normalizedSamples)
-    centroid = sampleMatrix.mean(axis=0)
+    centroid = calculateCentroid(normalizedSamples)
     distances = np.linalg.norm(sampleMatrix - centroid, axis=1)
     distanceThreshold = max(
         float(np.quantile(distances, 0.95)), MIN_DISTANCE_THRESHOLD
@@ -59,6 +60,31 @@ def loadCustomGestureModel(modelPath: Path) -> dict[str, Any]:
     return joblib.load(modelPath)
 
 
+def findSimilarGesture(
+    landmarkSamples: list[list[Any]],
+    modelDirectory: Path = MODEL_DIRECTORY,
+) -> str | None:
+    """Return an existing label when new samples are too similar to it."""
+    if not landmarkSamples or not modelDirectory.exists():
+        return None
+
+    candidateCentroid = calculateCentroid(
+        [normalizeLandmarks(landmarks) for landmarks in landmarkSamples]
+    )
+    for modelPath in modelDirectory.glob("*.joblib"):
+        savedModel = loadCustomGestureModel(modelPath)
+        centroidDistance = float(
+            np.linalg.norm(candidateCentroid - savedModel["centroid"])
+        )
+        similarityThreshold = (
+            savedModel["distanceThreshold"] * SIMILARITY_DISTANCE_MULTIPLIER
+        )
+        if centroidDistance <= similarityThreshold:
+            return str(savedModel["gestureLabel"])
+
+    return None
+
+
 def normalizeLandmarks(landmarks: list[Any]) -> list[float]:
     """Create a translation- and scale-invariant landmark feature vector."""
     if len(landmarks) != LANDMARK_COUNT:
@@ -78,3 +104,8 @@ def normalizeLandmarks(landmarks: list[Any]) -> list[float]:
         for point in translatedPoints
         for coordinate in point
     ]
+
+
+def calculateCentroid(normalizedSamples: list[list[float]]) -> np.ndarray:
+    """Return the average feature vector for a recorded gesture."""
+    return np.array(normalizedSamples).mean(axis=0)
