@@ -66,3 +66,4 @@ def test_mainWindowProvidesInstalledApplicationSuggestions() -> None:
     assert "Choose installed app or type a name" in source
     assert "placeholder_text" not in source
     assert "valueEntry.delete" not in source
+    assert "Select from the dropdown or type in the box." in source
