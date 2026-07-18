@@ -8,10 +8,19 @@ from typing import Any
 
 
 ACTION_KEY = "action"
+LOCK_SCREEN_ACTION = "lock-screen"
+MEDIA_PLAY_PAUSE_ACTION = "media-play-pause"
 OPEN_APPLICATION_ACTION = "open-app"
 SCREENSHOT_ACTION = "take-screenshot"
+SWITCH_TAB_NEXT_ACTION = "switch-tab-next"
+SWITCH_TAB_PREVIOUS_ACTION = "switch-tab-previous"
 VALUE_KEY = "value"
 DEFAULT_SCREENSHOT_DIRECTORY = Path.home() / "Desktop"
+LOCK_SCREEN_COMMAND = [
+    "/System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/"
+    "CGSession",
+    "-suspend",
+]
 
 
 class ActionExecutor:
@@ -38,6 +47,22 @@ class ActionExecutor:
             self.openApplication(action.get(VALUE_KEY))
             return
 
+        if actionName == MEDIA_PLAY_PAUSE_ACTION:
+            self.toggleMediaPlayback()
+            return
+
+        if actionName == SWITCH_TAB_NEXT_ACTION:
+            self.switchBrowserTab(isPreviousTab=False)
+            return
+
+        if actionName == SWITCH_TAB_PREVIOUS_ACTION:
+            self.switchBrowserTab(isPreviousTab=True)
+            return
+
+        if actionName == LOCK_SCREEN_ACTION:
+            self.lockScreen()
+            return
+
         raise ValueError(f"Unsupported action: {actionName}")
 
     def captureScreenshot(self) -> None:
@@ -52,3 +77,29 @@ class ActionExecutor:
             raise ValueError("Open-app actions require an application name.")
 
         self.commandRunner(["open", "-a", applicationName], check=True)
+
+    def toggleMediaPlayback(self) -> None:
+        """Send macOS's standard F8 media play/pause key event."""
+        self.commandRunner(
+            [
+                "osascript",
+                "-e",
+                'tell application "System Events" to key code 100',
+            ],
+            check=True,
+        )
+
+    def switchBrowserTab(self, isPreviousTab: bool) -> None:
+        """Send the standard macOS next or previous tab keyboard shortcut."""
+        modifierKeys = "{command down, shift down}" if isPreviousTab else (
+            "{command down}"
+        )
+        script = (
+            'tell application "System Events" to keystroke tab using '
+            f"{modifierKeys}"
+        )
+        self.commandRunner(["osascript", "-e", script], check=True)
+
+    def lockScreen(self) -> None:
+        """Lock the current macOS session without invoking a shell."""
+        self.commandRunner(LOCK_SCREEN_COMMAND, check=True)

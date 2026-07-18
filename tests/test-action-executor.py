@@ -43,3 +43,69 @@ def test_executeActionOpensNamedApplication() -> None:
         ["open", "-a", "Google Chrome"],
         check=True,
     )
+
+
+def test_executeActionTogglesSystemMediaPlayback() -> None:
+    commandRunner = Mock()
+    executor = actionExecutor.ActionExecutor(commandRunner)
+
+    executor.executeAction({"action": "media-play-pause", "value": None})
+
+    commandRunner.assert_called_once_with(
+        [
+            "osascript",
+            "-e",
+            'tell application "System Events" to key code 100',
+        ],
+        check=True,
+    )
+
+
+def test_executeActionMovesToNextBrowserTab() -> None:
+    commandRunner = Mock()
+    executor = actionExecutor.ActionExecutor(commandRunner)
+
+    executor.executeAction({"action": "switch-tab-next", "value": None})
+
+    commandRunner.assert_called_once_with(
+        [
+            "osascript",
+            "-e",
+            'tell application "System Events" to keystroke tab using '
+            "{command down}",
+        ],
+        check=True,
+    )
+
+
+def test_executeActionMovesToPreviousBrowserTab() -> None:
+    commandRunner = Mock()
+    executor = actionExecutor.ActionExecutor(commandRunner)
+
+    executor.executeAction({"action": "switch-tab-previous", "value": None})
+
+    commandRunner.assert_called_once_with(
+        [
+            "osascript",
+            "-e",
+            'tell application "System Events" to keystroke tab using '
+            "{command down, shift down}",
+        ],
+        check=True,
+    )
+
+
+def test_executeActionLocksTheScreen() -> None:
+    commandRunner = Mock()
+    executor = actionExecutor.ActionExecutor(commandRunner)
+
+    executor.executeAction({"action": "lock-screen", "value": None})
+
+    commandRunner.assert_called_once_with(
+        [
+            "/System/Library/CoreServices/Menu Extras/User.menu/Contents/"
+            "Resources/CGSession",
+            "-suspend",
+        ],
+        check=True,
+    )
