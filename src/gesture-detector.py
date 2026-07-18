@@ -1,6 +1,7 @@
 """Recognize built-in gestures with MediaPipe's local task model."""
 
 from collections.abc import Callable
+from collections import deque
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 import time
@@ -13,6 +14,7 @@ import numpy as np
 MODEL_FILE_PATH = (
     Path(__file__).parents[1] / "assets" / "models" / "gesture_recognizer.task"
 )
+MOVEMENT_FRAME_WINDOW = 20
 
 
 class GestureDetector:
@@ -27,6 +29,9 @@ class GestureDetector:
         ] | None = None,
         timestampProvider: Callable[[], int] | None = None,
         recognizerFactory: Callable[[], Any] | None = None,
+        movementGestureDetector: Callable[
+            [list[list[Any]]], tuple[str, float] | None
+        ] | None = None,
     ) -> None:
         self.recognizerFactory = recognizerFactory
         if recognizer is None:
@@ -39,6 +44,12 @@ class GestureDetector:
         self.imageFactory = imageFactory or createMediaPipeImage
         self.customGestureDetector = (
             customGestureDetector or createCustomGestureDetector()
+        )
+        self.movementGestureDetector = (
+            movementGestureDetector or createMovementGestureDetector()
+        )
+        self.movementFrames: deque[list[Any]] = deque(
+            maxlen=MOVEMENT_FRAME_WINDOW
         )
         self.timestampProvider = timestampProvider or getTimestampMilliseconds
         self.lastTimestampMilliseconds = -1
@@ -53,6 +64,14 @@ class GestureDetector:
         recognitionResult = self.getRecognitionResult(frame)
         landmarks = getFirstHandLandmarks(recognitionResult)
         if landmarks is not None:
+            self.movementFrames.append(landmarks)
+            movementResult = self.movementGestureDetector(
+                list(self.movementFrames)
+            )
+            if movementResult is not None:
+                gestureLabel, confidenceScore = movementResult
+                if confidenceScore >= threshold:
+                    return gestureLabel, confidenceScore
             customResult = self.customGestureDetector(landmarks)
             if customResult is not None:
                 gestureLabel, confidenceScore = customResult
@@ -89,6 +108,7 @@ class GestureDetector:
     def resetTracking(self) -> None:
         """Reset video tracking before evaluating the next gesture."""
         self.lastTimestampMilliseconds = -1
+        self.movementFrames.clear()
         if self.recognizerFactory is None:
             return
 
@@ -138,6 +158,20 @@ def createCustomGestureDetector() -> Callable[
     customTrainer = module_from_spec(moduleSpec)
     moduleSpec.loader.exec_module(customTrainer)
     return customTrainer.detectCustomGesture
+
+
+def createMovementGestureDetector() -> Callable[
+    [list[list[Any]]], tuple[str, float] | None
+]:
+    """Load the local movement trainer from its kebab-case source file."""
+    trainerPath = Path(__file__).with_name("movement-trainer.py")
+    moduleSpec = spec_from_file_location("movementTrainer", trainerPath)
+    if moduleSpec is None or moduleSpec.loader is None:
+        raise ImportError("Unable to load the movement gesture trainer.")
+
+    movementTrainer = module_from_spec(moduleSpec)
+    moduleSpec.loader.exec_module(movementTrainer)
+    return movementTrainer.detectMovementGesture
 
 
 def getFirstHandLandmarks(recognitionResult: Any) -> list[Any] | None:

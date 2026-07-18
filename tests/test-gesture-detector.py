@@ -117,6 +117,29 @@ def test_detectGesturePrefersTrainedGestureOverBuiltInLabel() -> None:
     assert result == ("my-palm", 0.91)
 
 
+def test_detectGesturePrefersTrainedMovementOverStaticGesture() -> None:
+    recognizer = Mock()
+    landmarks = [SimpleNamespace(x=0.5, y=0.5, z=0.0) for _ in range(21)]
+    recognizer.recognize_for_video.return_value = SimpleNamespace(
+        gestures=[],
+        hand_landmarks=[SimpleNamespace(landmark=landmarks)],
+    )
+    movementDetector = Mock(return_value=("swipe-right", 0.94))
+    detector = gestureDetector.GestureDetector(
+        recognizer,
+        lambda image: image,
+        Mock(return_value=("my-palm", 0.91)),
+        movementGestureDetector=movementDetector,
+    )
+
+    result = detector.detectGesture(
+        np.zeros((480, 640, 3), dtype=np.uint8),
+        threshold=0.80,
+    )
+
+    assert result == ("swipe-right", 0.94)
+
+
 def test_resetTrackingRecreatesTheVideoRecognizer() -> None:
     recognizer = Mock()
     recognizerFactory = Mock(return_value=Mock())

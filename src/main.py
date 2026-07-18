@@ -19,6 +19,7 @@ class GestoApplication:
         mapperModule = loadModule("action-mapper.py", "actionMapper")
         executorModule = loadModule("action-executor.py", "actionExecutor")
         trainerModule = loadModule("custom-trainer.py", "customTrainer")
+        movementModule = loadModule("movement-trainer.py", "movementTrainer")
         trainingModule = loadModule("training-session.py", "trainingSession")
         loopModule = loadModule("detection-loop.py", "detectionLoop")
         controllerModule = loadModule(
@@ -31,10 +32,16 @@ class GestoApplication:
         self.gestureDetector = detectorModule.GestureDetector()
         self.actionExecutor = executorModule.ActionExecutor()
         self.customTrainer = trainerModule
+        self.movementTrainer = movementModule
         self.trainingSession = trainingModule.TrainingSession(
             self.cameraHandler,
             self.gestureDetector.extractLandmarks,
             self.customTrainer.trainCustomGesture,
+        )
+        self.movementTrainingSession = trainingModule.MovementTrainingSession(
+            self.cameraHandler,
+            self.gestureDetector.extractLandmarks,
+            self.movementTrainer.trainMovementGesture,
         )
         self.statusLock = threading.Lock()
         self.detectionStatus = "Ready to start detection"
@@ -63,7 +70,8 @@ class GestoApplication:
             self.stopDetection,
             self.getDetectionStatus,
             self.startCustomTraining,
-            self.customTrainer.listCustomGestureLabels,
+            self.startMovementTraining,
+            self.getTrainedGestureLabels,
         )
         window.mainloop()
 
@@ -99,6 +107,19 @@ class GestoApplication:
         if self.detectionThread is not None:
             self.detectionThread.join(timeout=1)
         return self.trainingSession.train(gestureLabel)
+
+    def startMovementTraining(self, gestureLabel: str) -> Path:
+        """Stop live detection and record a local movement gesture."""
+        self.stopDetection()
+        if self.detectionThread is not None:
+            self.detectionThread.join(timeout=1)
+        return self.movementTrainingSession.train(gestureLabel)
+
+    def getTrainedGestureLabels(self) -> list[str]:
+        """Return static and movement labels available for local mapping."""
+        labels = self.customTrainer.listCustomGestureLabels()
+        labels.extend(self.movementTrainer.listMovementGestureLabels())
+        return sorted(set(labels))
 
     def runDetectionLoop(self) -> None:
         """Process camera frames until the user stops detection."""
