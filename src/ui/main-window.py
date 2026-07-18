@@ -8,14 +8,7 @@ from typing import Any
 import customtkinter as ctk
 
 
-BUILT_IN_GESTURES = (
-    "open-palm",
-    "fist",
-    "pointing",
-    "thumbs-up",
-    "thumbs-down",
-    "peace-sign",
-)
+CUSTOM_GESTURE_PLACEHOLDER = "train-a-custom-gesture-first"
 SUPPORTED_ACTIONS = (
     "take-screenshot",
     "open-app",
@@ -115,7 +108,7 @@ class MainWindow(ctk.CTk):
 
         self.gestureMenu = ctk.CTkOptionMenu(
             formFrame,
-            values=list(BUILT_IN_GESTURES) + self.getCustomGestureLabels(),
+            values=self.getGestureMenuValues(),
         )
         self.gestureMenu.grid(row=1, column=0, sticky="ew", padx=18, pady=8)
         self.actionMenu = ctk.CTkOptionMenu(
@@ -185,6 +178,10 @@ class MainWindow(ctk.CTk):
         if not isApplicationAction:
             self.valueEntry.delete(0, "end")
 
+    def getGestureMenuValues(self) -> list[str]:
+        """Show trained gestures, or a non-mappable training prompt."""
+        return self.getCustomGestureLabels() or [CUSTOM_GESTURE_PLACEHOLDER]
+
     def openTrainingDialog(self) -> None:
         """Open a small local-only naming dialog for a training session."""
         dialog = ctk.CTkInputDialog(
@@ -222,9 +219,7 @@ class MainWindow(ctk.CTk):
             return
 
         if eventName == "complete":
-            gestureLabels = (
-                list(BUILT_IN_GESTURES) + self.getCustomGestureLabels()
-            )
+            gestureLabels = self.getGestureMenuValues()
             self.gestureMenu.configure(values=gestureLabels)
             self.gestureMenu.set(detail)
             self.statusLabel.configure(
