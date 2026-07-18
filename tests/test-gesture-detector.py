@@ -43,6 +43,27 @@ def test_detectGestureRejectsResultBelowUserConfidenceThreshold() -> None:
     assert result is None
 
 
+def test_detectGestureUsesCustomModelWhenNoBuiltInGestureMatches() -> None:
+    recognizer = Mock()
+    landmarks = [SimpleNamespace(x=0.5, y=0.5, z=0.0) for _ in range(21)]
+    recognizer.recognize.return_value = SimpleNamespace(
+        gestures=[],
+        hand_landmarks=[SimpleNamespace(landmark=landmarks)],
+    )
+    customDetector = Mock(return_value=("three-finger-tap", 0.91))
+    detector = gestureDetector.GestureDetector(
+        recognizer,
+        lambda image: image,
+        customDetector,
+    )
+    frame = np.zeros((480, 640, 3), dtype=np.uint8)
+
+    result = detector.detectGesture(frame, threshold=0.80)
+
+    assert result == ("three-finger-tap", 0.91)
+    customDetector.assert_called_once_with(landmarks)
+
+
 def createGestureResult(label: str, score: float) -> SimpleNamespace:
     category = SimpleNamespace(category_name=label, score=score)
     return SimpleNamespace(gestures=[[category]])
