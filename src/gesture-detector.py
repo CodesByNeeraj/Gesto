@@ -21,6 +21,8 @@ BUILT_IN_GESTURE_LABELS = {
     "Thumb_Up": "thumbs-up",
     "Victory": "peace-sign",
 }
+FINGER_JOINT_INDICES = ((6, 8), (10, 12), (14, 16), (18, 20))
+OPEN_PALM_EXTENSION_RATIO = 1.25
 
 
 class GestureDetector:
@@ -56,14 +58,16 @@ class GestureDetector:
             mediaPipeImage,
             self.getNextTimestampMilliseconds(),
         )
+        landmarks = getFirstHandLandmarks(recognitionResult)
         category = getTopGestureCategory(recognitionResult)
         if category is not None:
             gestureLabel = BUILT_IN_GESTURE_LABELS.get(category.category_name)
             confidenceScore = float(category.score)
+            if gestureLabel == "fist" and isOpenPalmShape(landmarks):
+                gestureLabel = "open-palm"
             if gestureLabel is not None and confidenceScore >= threshold:
                 return gestureLabel, confidenceScore
 
-        landmarks = getFirstHandLandmarks(recognitionResult)
         if landmarks is None:
             return None
 
@@ -147,3 +151,29 @@ def getFirstHandLandmarks(recognitionResult: Any) -> list[Any] | None:
 
     firstHand = handLandmarks[0]
     return getattr(firstHand, "landmark", firstHand)
+
+
+def isOpenPalmShape(landmarks: list[Any] | None) -> bool:
+    """Return whether the four non-thumb fingers are clearly extended."""
+    if landmarks is None or len(landmarks) < 21:
+        return False
+
+    wrist = landmarks[0]
+    for jointIndex, tipIndex in FINGER_JOINT_INDICES:
+        jointDistance = getLandmarkDistance(wrist, landmarks[jointIndex])
+        tipDistance = getLandmarkDistance(wrist, landmarks[tipIndex])
+        if tipDistance < jointDistance * OPEN_PALM_EXTENSION_RATIO:
+            return False
+
+    return True
+
+
+def getLandmarkDistance(first: Any, second: Any) -> float:
+    """Return the Euclidean distance between two normalized landmarks."""
+    return float(
+        np.sqrt(
+            (first.x - second.x) ** 2
+            + (first.y - second.y) ** 2
+            + (first.z - second.z) ** 2
+        )
+    )
