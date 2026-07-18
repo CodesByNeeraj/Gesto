@@ -24,6 +24,7 @@ class DetectionLoop:
         config: dict[str, Any],
         timeProvider: Callable[[], float] = time.monotonic,
         onDetection: Callable[[str, float], None] | None = None,
+        onActionExecuted: Callable[[str, dict[str, Any]], None] | None = None,
     ) -> None:
         self.cameraHandler = cameraHandler
         self.gestureDetector = gestureDetector
@@ -32,6 +33,7 @@ class DetectionLoop:
         self.config = config
         self.timeProvider = timeProvider
         self.onDetection = onDetection
+        self.onActionExecuted = onActionExecuted
         self.lastTriggeredAt: dict[str, float] = {}
 
     def startDetection(self) -> bool:
@@ -67,6 +69,8 @@ class DetectionLoop:
 
         self.executeAction(action)
         self.lastTriggeredAt[gestureLabel] = self.timeProvider()
+        if self.onActionExecuted is not None:
+            self.onActionExecuted(gestureLabel, action)
         return True
 
     def isGestureInCooldown(self, gestureLabel: str) -> bool:

@@ -6,6 +6,8 @@ import cv2
 
 
 DEFAULT_CAMERA_INDEX = 0
+CAMERA_FRAME_WIDTH = 640
+CAMERA_FRAME_HEIGHT = 480
 
 
 class CameraHandler:
@@ -19,6 +21,8 @@ class CameraHandler:
         """Open the configured camera and report whether it is available."""
         self.releaseCamera()
         self.camera = cv2.VideoCapture(self.cameraIndex)
+        self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, CAMERA_FRAME_WIDTH)
+        self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, CAMERA_FRAME_HEIGHT)
 
         if not self.camera.isOpened():
             self.releaseCamera()
