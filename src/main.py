@@ -28,12 +28,15 @@ class GestoApplication:
         self.cameraHandler = cameraModule.CameraHandler()
         self.gestureDetector = detectorModule.GestureDetector()
         self.actionExecutor = executorModule.ActionExecutor()
+        self.statusLock = threading.Lock()
+        self.detectionStatus = "Ready to start detection"
         self.detectionLoop = loopModule.DetectionLoop(
             self.cameraHandler,
             self.gestureDetector,
             mapperModule.mapGestureToAction,
             self.actionExecutor.executeAction,
             self.config,
+            onDetection=self.recordDetection,
         )
         self.mappingController = controllerModule.MainWindowController(
             self.config,
@@ -49,6 +52,7 @@ class GestoApplication:
             self.mappingController,
             self.startDetection,
             self.stopDetection,
+            self.getDetectionStatus,
         )
         window.mainloop()
 
@@ -64,6 +68,8 @@ class GestoApplication:
             return False
 
         self.stopEvent.clear()
+        with self.statusLock:
+            self.detectionStatus = "Waiting for a recognized gesture"
         self.detectionThread = threading.Thread(
             target=self.runDetectionLoop,
             daemon=True,
@@ -78,8 +84,28 @@ class GestoApplication:
 
     def runDetectionLoop(self) -> None:
         """Process camera frames until the user stops detection."""
-        while not self.stopEvent.is_set():
-            self.detectionLoop.processNextFrame()
+        try:
+            while not self.stopEvent.is_set():
+                self.detectionLoop.processNextFrame()
+        except Exception as error:
+            with self.statusLock:
+                self.detectionStatus = f"Detection error: {error}"
+            self.stopEvent.set()
+            self.detectionLoop.stopDetection()
+
+    def recordDetection(
+        self, gestureLabel: str, confidenceScore: float
+    ) -> None:
+        """Store the latest gesture for the settings-window status area."""
+        with self.statusLock:
+            self.detectionStatus = (
+                f"Detected {gestureLabel} at {confidenceScore:.0%} confidence"
+            )
+
+    def getDetectionStatus(self) -> str:
+        """Return a thread-safe snapshot of the latest detector status."""
+        with self.statusLock:
+            return self.detectionStatus
 
 
 def loadModule(modulePath: str, moduleName: str) -> ModuleType:

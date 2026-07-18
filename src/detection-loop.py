@@ -23,6 +23,7 @@ class DetectionLoop:
         executeAction: Callable[[dict[str, Any]], None],
         config: dict[str, Any],
         timeProvider: Callable[[], float] = time.monotonic,
+        onDetection: Callable[[str, float], None] | None = None,
     ) -> None:
         self.cameraHandler = cameraHandler
         self.gestureDetector = gestureDetector
@@ -30,6 +31,7 @@ class DetectionLoop:
         self.executeAction = executeAction
         self.config = config
         self.timeProvider = timeProvider
+        self.onDetection = onDetection
         self.lastTriggeredAt: dict[str, float] = {}
 
     def startDetection(self) -> bool:
@@ -50,6 +52,9 @@ class DetectionLoop:
             return False
 
         gestureLabel, confidenceScore = detection
+        if self.onDetection is not None:
+            self.onDetection(gestureLabel, confidenceScore)
+
         if confidenceScore < threshold:
             return False
 
