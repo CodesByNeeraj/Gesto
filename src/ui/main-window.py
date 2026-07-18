@@ -23,6 +23,7 @@ SUPPORTED_ACTIONS = (
     "lock-screen",
 )
 GESTURES_KEY = "gestures"
+OPEN_APPLICATION_ACTION = "open-app"
 
 
 class MainWindow(ctk.CTk):
@@ -112,6 +113,7 @@ class MainWindow(ctk.CTk):
         self.actionMenu = ctk.CTkOptionMenu(
             formFrame,
             values=list(SUPPORTED_ACTIONS),
+            command=self.updateActionValueField,
         )
         self.actionMenu.grid(row=2, column=0, sticky="ew", padx=18, pady=8)
         self.valueEntry = ctk.CTkEntry(
@@ -119,6 +121,7 @@ class MainWindow(ctk.CTk):
             placeholder_text="Application name (only for open-app)",
         )
         self.valueEntry.grid(row=3, column=0, sticky="ew", padx=18, pady=8)
+        self.updateActionValueField(self.actionMenu.get())
         ctk.CTkButton(
             formFrame,
             text="Save Mapping",
@@ -158,6 +161,14 @@ class MainWindow(ctk.CTk):
         )
         self.valueEntry.delete(0, "end")
         self.refreshMappings()
+
+    def updateActionValueField(self, actionName: str) -> None:
+        """Only accept an application name when opening a named app."""
+        isApplicationAction = actionName == OPEN_APPLICATION_ACTION
+        entryState = "normal" if isApplicationAction else "disabled"
+        self.valueEntry.configure(state=entryState)
+        if not isApplicationAction:
+            self.valueEntry.delete(0, "end")
 
     def refreshMappings(self) -> None:
         """Render the latest local gesture-to-action mappings."""

@@ -13,6 +13,7 @@ BUILT_IN_GESTURES = (
     "peace-sign",
 )
 GESTURES_KEY = "gestures"
+OPEN_APPLICATION_ACTION = "open-app"
 
 
 class MainWindowController:
@@ -32,6 +33,9 @@ class MainWindowController:
         self, gestureLabel: str, actionName: str, actionValue: str | None
     ) -> None:
         """Add or update a gesture mapping in local configuration."""
+        actionValue = (
+            actionValue if actionName == OPEN_APPLICATION_ACTION else None
+        )
         mapping = {
             "id": gestureLabel,
             "type": self.getGestureType(gestureLabel),
