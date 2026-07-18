@@ -16,6 +16,8 @@ SWITCH_TAB_NEXT_ACTION = "switch-tab-next"
 SWITCH_TAB_PREVIOUS_ACTION = "switch-tab-previous"
 VALUE_KEY = "value"
 DEFAULT_SCREENSHOT_DIRECTORY = Path.home() / "Desktop"
+SWIFT_EXECUTABLE = "/usr/bin/swift"
+MEDIA_CONTROL_SCRIPT_PATH = Path(__file__).with_name("media-control.swift")
 LOCK_SCREEN_COMMAND = [
     "/System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/"
     "CGSession",
@@ -79,12 +81,11 @@ class ActionExecutor:
         self.commandRunner(["open", "-a", applicationName], check=True)
 
     def toggleMediaPlayback(self) -> None:
-        """Send macOS's standard F8 media play/pause key event."""
+        """Post macOS's global media play/pause event without app targeting."""
         self.commandRunner(
             [
-                "osascript",
-                "-e",
-                'tell application "System Events" to key code 100',
+                SWIFT_EXECUTABLE,
+                str(MEDIA_CONTROL_SCRIPT_PATH),
             ],
             check=True,
         )
