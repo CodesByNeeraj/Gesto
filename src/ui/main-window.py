@@ -128,13 +128,33 @@ class MainWindow(ctk.CTk):
             text="Save Mapping",
             command=self.saveMapping,
         ).grid(row=4, column=0, sticky="ew", padx=18, pady=(8, 18))
-        ctk.CTkButton(
+        self.trainButton = ctk.CTkButton(
             formFrame,
             text="Train a custom gesture",
             fg_color="transparent",
             border_width=1,
             command=self.openTrainingDialog,
-        ).grid(row=5, column=0, sticky="ew", padx=18, pady=(0, 18))
+        )
+        self.trainButton.grid(
+            row=5,
+            column=0,
+            sticky="ew",
+            padx=18,
+            pady=(0, 8),
+        )
+        self.trainingHintLabel = ctk.CTkLabel(
+            formFrame,
+            text="",
+            text_color="gray70",
+            wraplength=280,
+        )
+        self.trainingHintLabel.grid(
+            row=6,
+            column=0,
+            sticky="w",
+            padx=18,
+            pady=(0, 18),
+        )
 
     def createMappingsList(self, parent: ctk.CTkFrame) -> None:
         """Create the scrollable area that shows saved mappings."""
@@ -291,6 +311,8 @@ class MainWindow(ctk.CTk):
                 text_color="gray70",
             )
             self.toggleButton.configure(text="Start Detection")
+            self.trainButton.configure(state="normal")
+            self.trainingHintLabel.configure(text="")
             return
 
         if self.startDetection():
@@ -300,6 +322,10 @@ class MainWindow(ctk.CTk):
                 text_color="#4ade80",
             )
             self.toggleButton.configure(text="Stop Detection")
+            self.trainButton.configure(state="disabled")
+            self.trainingHintLabel.configure(
+                text="End detection to train a custom gesture."
+            )
             return
 
         self.statusLabel.configure(
