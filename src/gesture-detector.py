@@ -60,13 +60,15 @@ class GestureDetector:
         if frame is None or frame.size == 0:
             return None
 
-        rgbFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        mediaPipeImage = self.imageFactory(rgbFrame)
-        recognitionResult = self.recognizer.recognize_for_video(
-            mediaPipeImage,
-            self.getNextTimestampMilliseconds(),
-        )
+        recognitionResult = self.getRecognitionResult(frame)
         landmarks = getFirstHandLandmarks(recognitionResult)
+        if landmarks is not None:
+            customResult = self.customGestureDetector(landmarks)
+            if customResult is not None:
+                gestureLabel, confidenceScore = customResult
+                if confidenceScore >= threshold:
+                    return gestureLabel, confidenceScore
+
         category = getTopGestureCategory(recognitionResult)
         if category is not None:
             gestureLabel = BUILT_IN_GESTURE_LABELS.get(category.category_name)
@@ -76,18 +78,23 @@ class GestureDetector:
             if gestureLabel is not None and confidenceScore >= threshold:
                 return gestureLabel, confidenceScore
 
-        if landmarks is None:
+        return None
+
+    def extractLandmarks(self, frame: np.ndarray | None) -> list[Any] | None:
+        """Return one hand's landmarks for local custom-gesture training."""
+        if frame is None or frame.size == 0:
             return None
 
-        customResult = self.customGestureDetector(landmarks)
-        if customResult is None:
-            return None
+        return getFirstHandLandmarks(self.getRecognitionResult(frame))
 
-        gestureLabel, confidenceScore = customResult
-        if confidenceScore < threshold:
-            return None
-
-        return gestureLabel, confidenceScore
+    def getRecognitionResult(self, frame: np.ndarray) -> Any:
+        """Run the local recognizer once and return its full result."""
+        rgbFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        mediaPipeImage = self.imageFactory(rgbFrame)
+        return self.recognizer.recognize_for_video(
+            mediaPipeImage,
+            self.getNextTimestampMilliseconds(),
+        )
 
     def getNextTimestampMilliseconds(self) -> int:
         """Return a strictly increasing timestamp for MediaPipe video mode."""

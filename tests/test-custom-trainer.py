@@ -72,6 +72,17 @@ def test_detectCustomGestureReturnsSavedGestureForMatchingLandmarks(
     assert result == ("three-finger-tap", 1.0)
 
 
+def test_listCustomGestureLabelsReturnsSavedGestureNames(
+    tmp_path: Path,
+) -> None:
+    samples = [createLandmarks(index * 0.001) for index in range(20)]
+    customTrainer.trainCustomGesture("three-finger-tap", samples, tmp_path)
+
+    labels = customTrainer.listCustomGestureLabels(tmp_path)
+
+    assert labels == ["three-finger-tap"]
+
+
 def createLandmarks(offset: float) -> list[SimpleNamespace]:
     return [
         SimpleNamespace(x=index * 0.01 + offset, y=index * 0.02, z=0.0)
