@@ -18,6 +18,7 @@ VALUE_KEY = "value"
 DEFAULT_SCREENSHOT_DIRECTORY = Path.home() / "Desktop"
 SWIFT_EXECUTABLE = "/usr/bin/swift"
 MEDIA_CONTROL_SCRIPT_PATH = Path(__file__).with_name("media-control.swift")
+TAB_CONTROL_SCRIPT_PATH = Path(__file__).with_name("tab-control.swift")
 LOCK_SCREEN_COMMAND = [
     "/System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/"
     "CGSession",
@@ -91,15 +92,11 @@ class ActionExecutor:
         )
 
     def switchBrowserTab(self, isPreviousTab: bool) -> None:
-        """Send the standard macOS next or previous tab keyboard shortcut."""
-        modifierKeys = "{command down, shift down}" if isPreviousTab else (
-            "{command down}"
-        )
-        script = (
-            'tell application "System Events" to keystroke tab using '
-            f"{modifierKeys}"
-        )
-        self.commandRunner(["osascript", "-e", script], check=True)
+        """Post native browser next or previous tab shortcut events."""
+        command = [SWIFT_EXECUTABLE, str(TAB_CONTROL_SCRIPT_PATH)]
+        if isPreviousTab:
+            command.append("--previous")
+        self.commandRunner(command, check=True)
 
     def lockScreen(self) -> None:
         """Lock the current macOS session without invoking a shell."""
