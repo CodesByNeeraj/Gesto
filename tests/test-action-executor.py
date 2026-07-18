@@ -53,9 +53,8 @@ def test_executeActionTogglesSystemMediaPlayback() -> None:
 
     commandRunner.assert_called_once_with(
         [
-            "osascript",
-            "-e",
-            'tell application "System Events" to key code 100',
+            actionExecutor.SWIFT_EXECUTABLE,
+            str(actionExecutor.MEDIA_CONTROL_SCRIPT_PATH),
         ],
         check=True,
     )
