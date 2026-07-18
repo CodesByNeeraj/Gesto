@@ -14,7 +14,14 @@ BUILT_IN_GESTURES = (
     "thumbs-down",
     "peace-sign",
 )
-SUPPORTED_ACTIONS = ("take-screenshot", "open-app")
+SUPPORTED_ACTIONS = (
+    "take-screenshot",
+    "open-app",
+    "media-play-pause",
+    "switch-tab-next",
+    "switch-tab-previous",
+    "lock-screen",
+)
 GESTURES_KEY = "gestures"
 
 
