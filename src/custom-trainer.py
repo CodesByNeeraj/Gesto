@@ -85,6 +85,34 @@ def findSimilarGesture(
     return None
 
 
+def detectCustomGesture(
+    landmarks: list[Any],
+    modelDirectory: Path = MODEL_DIRECTORY,
+) -> tuple[str, float] | None:
+    """Return the nearest saved custom gesture within its distance limit."""
+    if not modelDirectory.exists():
+        return None
+
+    normalizedLandmarks = normalizeLandmarks(landmarks)
+    closestResult: tuple[str, float] | None = None
+    for modelPath in modelDirectory.glob("*.joblib"):
+        savedModel = loadCustomGestureModel(modelPath)
+        distance = float(
+            savedModel["classifier"].kneighbors(
+                [normalizedLandmarks], n_neighbors=1
+            )[0][0][0]
+        )
+        threshold = float(savedModel["distanceThreshold"])
+        if distance > threshold:
+            continue
+
+        confidenceScore = 1.0 - (distance / threshold)
+        if closestResult is None or confidenceScore > closestResult[1]:
+            closestResult = (str(savedModel["gestureLabel"]), confidenceScore)
+
+    return closestResult
+
+
 def normalizeLandmarks(landmarks: list[Any]) -> list[float]:
     """Create a translation- and scale-invariant landmark feature vector."""
     if len(landmarks) != LANDMARK_COUNT:

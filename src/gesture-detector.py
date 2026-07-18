@@ -1,6 +1,7 @@
 """Recognize built-in gestures with MediaPipe's local task model."""
 
 from collections.abc import Callable
+from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from typing import Any
 
@@ -28,9 +29,15 @@ class GestureDetector:
         self,
         recognizer: Any | None = None,
         imageFactory: Callable[[np.ndarray], Any] | None = None,
+        customGestureDetector: Callable[
+            [list[Any]], tuple[str, float] | None
+        ] | None = None,
     ) -> None:
         self.recognizer = recognizer or createGestureRecognizer()
         self.imageFactory = imageFactory or createMediaPipeImage
+        self.customGestureDetector = (
+            customGestureDetector or createCustomGestureDetector()
+        )
 
     def detectGesture(
         self, frame: np.ndarray | None, threshold: float
@@ -43,12 +50,22 @@ class GestureDetector:
         mediaPipeImage = self.imageFactory(rgbFrame)
         recognitionResult = self.recognizer.recognize(mediaPipeImage)
         category = getTopGestureCategory(recognitionResult)
-        if category is None:
+        if category is not None:
+            gestureLabel = BUILT_IN_GESTURE_LABELS.get(category.category_name)
+            confidenceScore = float(category.score)
+            if gestureLabel is not None and confidenceScore >= threshold:
+                return gestureLabel, confidenceScore
+
+        landmarks = getFirstHandLandmarks(recognitionResult)
+        if landmarks is None:
             return None
 
-        gestureLabel = BUILT_IN_GESTURE_LABELS.get(category.category_name)
-        confidenceScore = float(category.score)
-        if gestureLabel is None or confidenceScore < threshold:
+        customResult = self.customGestureDetector(landmarks)
+        if customResult is None:
+            return None
+
+        gestureLabel, confidenceScore = customResult
+        if confidenceScore < threshold:
             return None
 
         return gestureLabel, confidenceScore
@@ -78,9 +95,33 @@ def createMediaPipeImage(rgbFrame: np.ndarray) -> Any:
     return mp.Image(image_format=mp.ImageFormat.SRGB, data=rgbFrame)
 
 
+def createCustomGestureDetector() -> Callable[
+    [list[Any]], tuple[str, float] | None
+]:
+    """Load the custom trainer without violating Gesto's kebab-case files."""
+    trainerPath = Path(__file__).with_name("custom-trainer.py")
+    moduleSpec = spec_from_file_location("customTrainer", trainerPath)
+    if moduleSpec is None or moduleSpec.loader is None:
+        raise ImportError("Unable to load the custom gesture trainer.")
+
+    customTrainer = module_from_spec(moduleSpec)
+    moduleSpec.loader.exec_module(customTrainer)
+    return customTrainer.detectCustomGesture
+
+
 def getTopGestureCategory(recognitionResult: Any) -> Any | None:
     """Return the highest-scoring category for the first detected hand."""
     if not recognitionResult.gestures or not recognitionResult.gestures[0]:
         return None
 
     return recognitionResult.gestures[0][0]
+
+
+def getFirstHandLandmarks(recognitionResult: Any) -> list[Any] | None:
+    """Return the first hand's landmarks when MediaPipe detected a hand."""
+    handLandmarks = getattr(recognitionResult, "hand_landmarks", [])
+    if not handLandmarks:
+        return None
+
+    firstHand = handLandmarks[0]
+    return getattr(firstHand, "landmark", firstHand)
