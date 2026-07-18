@@ -91,12 +91,13 @@ def test_executeActionMovesToPreviousBrowserTab() -> None:
     )
 
 
-def test_tabControlUsesStandardControlTabBrowserShortcut() -> None:
+def test_tabControlUsesMacBrowserTabNavigationShortcut() -> None:
     script = actionExecutor.TAB_CONTROL_SCRIPT_PATH.read_text()
 
-    assert "let controlKey: CGKeyCode = 59" in script
-    assert "postKey(controlKey, true)" in script
-    assert "postKey(controlKey, false)" in script
+    assert "let rightArrowKey: CGKeyCode = 124" in script
+    assert "let leftArrowKey: CGKeyCode = 123" in script
+    assert "let navigationModifiers: CGEventFlags" in script
+    assert "event.flags = navigationModifiers" in script
 
 
 def test_executeActionLocksTheScreen() -> None:

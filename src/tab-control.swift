@@ -1,26 +1,22 @@
 import AppKit
 
-let controlKey: CGKeyCode = 59
-let shiftKey: CGKeyCode = 56
-let tabKey: CGKeyCode = 48
+let rightArrowKey: CGKeyCode = 124
+let leftArrowKey: CGKeyCode = 123
 let isPreviousTab = CommandLine.arguments.contains("--previous")
+let navigationModifiers: CGEventFlags = [.maskCommand, .maskAlternate]
 
 func postKey(_ key: CGKeyCode, _ isDown: Bool) {
-    let event = CGEvent(
+    guard let event = CGEvent(
         keyboardEventSource: nil,
         virtualKey: key,
         keyDown: isDown
-    )
-    event?.post(tap: .cghidEventTap)
+    ) else {
+        return
+    }
+    event.flags = navigationModifiers
+    event.post(tap: .cghidEventTap)
 }
 
-postKey(controlKey, true)
-if isPreviousTab {
-    postKey(shiftKey, true)
-}
-postKey(tabKey, true)
-postKey(tabKey, false)
-if isPreviousTab {
-    postKey(shiftKey, false)
-}
-postKey(controlKey, false)
+let tabDirectionKey = isPreviousTab ? leftArrowKey : rightArrowKey
+postKey(tabDirectionKey, true)
+postKey(tabDirectionKey, false)
