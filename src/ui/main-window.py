@@ -106,11 +106,29 @@ class MainWindow(ctk.CTk):
             font=ctk.CTkFont(size=18, weight="bold"),
         ).grid(row=0, column=0, sticky="w", padx=18, pady=(18, 8))
 
+        gestureSelectionFrame = ctk.CTkFrame(formFrame, fg_color="transparent")
+        gestureSelectionFrame.grid(
+            row=1,
+            column=0,
+            sticky="ew",
+            padx=18,
+            pady=8,
+        )
+        gestureSelectionFrame.grid_columnconfigure(0, weight=1)
         self.gestureMenu = ctk.CTkOptionMenu(
-            formFrame,
+            gestureSelectionFrame,
             values=self.getGestureMenuValues(),
         )
-        self.gestureMenu.grid(row=1, column=0, sticky="ew", padx=18, pady=8)
+        self.gestureMenu.grid(row=0, column=0, sticky="ew", padx=(0, 8))
+        self.retrainButton = ctk.CTkButton(
+            gestureSelectionFrame,
+            text="Retrain",
+            width=82,
+            fg_color="transparent",
+            border_width=1,
+            command=self.retrainSelectedGesture,
+        )
+        self.retrainButton.grid(row=0, column=1)
         self.actionMenu = ctk.CTkOptionMenu(
             formFrame,
             values=list(SUPPORTED_ACTIONS),
@@ -235,11 +253,40 @@ class MainWindow(ctk.CTk):
             daemon=True,
         ).start()
 
+    def retrainSelectedGesture(self) -> None:
+        """Replace the selected local gesture model without changing mapping.
+        """
+        gestureLabel = self.gestureMenu.get()
+        if gestureLabel == CUSTOM_GESTURE_PLACEHOLDER:
+            self.statusLabel.configure(
+                text="Train a custom gesture before retraining it.",
+                text_color="#f87171",
+            )
+            return
+
+        self.statusLabel.configure(
+            text=f"Retraining {gestureLabel}: capturing 40 samples…",
+            text_color="#60a5fa",
+        )
+        threading.Thread(
+            target=self.runCustomRetraining,
+            args=(gestureLabel,),
+            daemon=True,
+        ).start()
+
     def runCustomTraining(self, gestureLabel: str) -> None:
         """Run camera training outside the UI event loop."""
         try:
             self.startCustomTraining(gestureLabel)
             self.trainingEvents.put(("complete", gestureLabel))
+        except Exception as error:
+            self.trainingEvents.put(("error", str(error)))
+
+    def runCustomRetraining(self, gestureLabel: str) -> None:
+        """Retrain one existing local gesture while keeping its mapping."""
+        try:
+            self.startCustomTraining(gestureLabel)
+            self.trainingEvents.put(("retrained", gestureLabel))
         except Exception as error:
             self.trainingEvents.put(("error", str(error)))
 
@@ -251,14 +298,20 @@ class MainWindow(ctk.CTk):
             self.after(250, self.refreshTrainingEvents)
             return
 
-        if eventName == "complete":
+        if eventName in ("complete", "retrained"):
             gestureLabels = self.getGestureMenuValues()
             self.gestureMenu.configure(values=gestureLabels)
             self.gestureMenu.set(detail)
+            completionText = (
+                f"Retrained {detail}. Existing mapping retained."
+                if eventName == "retrained"
+                else (
+                    f"Trained {detail}. Choose an action and save its "
+                    "mapping."
+                )
+            )
             self.statusLabel.configure(
-                text=(
-                    f"Trained {detail}. Choose an action and save its mapping."
-                ),
+                text=completionText,
                 text_color="#4ade80",
             )
         else:
@@ -325,6 +378,7 @@ class MainWindow(ctk.CTk):
             )
             self.toggleButton.configure(text="Start Detection")
             self.trainButton.configure(state="normal")
+            self.retrainButton.configure(state="normal")
             self.trainingHintLabel.configure(text="")
             return
 
@@ -336,6 +390,7 @@ class MainWindow(ctk.CTk):
             )
             self.toggleButton.configure(text="Stop Detection")
             self.trainButton.configure(state="disabled")
+            self.retrainButton.configure(state="disabled")
             self.trainingHintLabel.configure(
                 text="End detection to train a custom gesture."
             )
