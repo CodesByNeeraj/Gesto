@@ -26,3 +26,11 @@ def test_openCameraOpensDefaultCameraWhenAvailable() -> None:
 
     assert isOpen is True
     mockVideoCapture.assert_called_once_with(0)
+    mockCamera.set.assert_any_call(
+        cameraHandler.cv2.CAP_PROP_FRAME_WIDTH,
+        cameraHandler.CAMERA_FRAME_WIDTH,
+    )
+    mockCamera.set.assert_any_call(
+        cameraHandler.cv2.CAP_PROP_FRAME_HEIGHT,
+        cameraHandler.CAMERA_FRAME_HEIGHT,
+    )
