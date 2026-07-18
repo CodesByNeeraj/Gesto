@@ -217,7 +217,7 @@ class MainWindow(ctk.CTk):
             self.actionMenu.get(),
             actionValue or None,
         )
-        self.valueEntry.delete(0, "end")
+        self.valueEntry.set("")
         self.refreshMappings()
         self.saveButton.configure(text="Saved Mapping", fg_color="#16a34a")
         self.after(2000, self.restoreSaveButton)
@@ -234,7 +234,7 @@ class MainWindow(ctk.CTk):
         if isApplicationAction and not self.valueEntry.get():
             self.valueEntry.set(APPLICATION_NAME_PLACEHOLDER)
         elif not isApplicationAction:
-            self.valueEntry.delete(0, "end")
+            self.valueEntry.set("")
 
     def getGestureMenuValues(self) -> list[str]:
         """Show trained gestures, or a non-mappable training prompt."""
