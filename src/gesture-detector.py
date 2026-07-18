@@ -13,20 +13,10 @@ import numpy as np
 MODEL_FILE_PATH = (
     Path(__file__).parents[1] / "assets" / "models" / "gesture_recognizer.task"
 )
-BUILT_IN_GESTURE_LABELS = {
-    "Closed_Fist": "fist",
-    "Open_Palm": "open-palm",
-    "Pointing_Up": "pointing",
-    "Thumb_Down": "thumbs-down",
-    "Thumb_Up": "thumbs-up",
-    "Victory": "peace-sign",
-}
-FINGER_JOINT_INDICES = ((6, 8), (10, 12), (14, 16), (18, 20))
-OPEN_PALM_EXTENSION_RATIO = 1.25
 
 
 class GestureDetector:
-    """Recognize MediaPipe's canned gestures from local camera frames."""
+    """Recognize locally trained gestures from MediaPipe hand landmarks."""
 
     def __init__(
         self,
@@ -56,7 +46,7 @@ class GestureDetector:
     def detectGesture(
         self, frame: np.ndarray | None, threshold: float
     ) -> tuple[str, float] | None:
-        """Return a supported built-in gesture above the user threshold."""
+        """Return a trained gesture above the user confidence threshold."""
         if frame is None or frame.size == 0:
             return None
 
@@ -68,15 +58,6 @@ class GestureDetector:
                 gestureLabel, confidenceScore = customResult
                 if confidenceScore >= threshold:
                     return gestureLabel, confidenceScore
-
-        category = getTopGestureCategory(recognitionResult)
-        if category is not None:
-            gestureLabel = BUILT_IN_GESTURE_LABELS.get(category.category_name)
-            confidenceScore = float(category.score)
-            if gestureLabel == "fist" and isOpenPalmShape(landmarks):
-                gestureLabel = "open-palm"
-            if gestureLabel is not None and confidenceScore >= threshold:
-                return gestureLabel, confidenceScore
 
         return None
 
@@ -159,14 +140,6 @@ def createCustomGestureDetector() -> Callable[
     return customTrainer.detectCustomGesture
 
 
-def getTopGestureCategory(recognitionResult: Any) -> Any | None:
-    """Return the highest-scoring category for the first detected hand."""
-    if not recognitionResult.gestures or not recognitionResult.gestures[0]:
-        return None
-
-    return recognitionResult.gestures[0][0]
-
-
 def getFirstHandLandmarks(recognitionResult: Any) -> list[Any] | None:
     """Return the first hand's landmarks when MediaPipe detected a hand."""
     handLandmarks = getattr(recognitionResult, "hand_landmarks", [])
@@ -175,29 +148,3 @@ def getFirstHandLandmarks(recognitionResult: Any) -> list[Any] | None:
 
     firstHand = handLandmarks[0]
     return getattr(firstHand, "landmark", firstHand)
-
-
-def isOpenPalmShape(landmarks: list[Any] | None) -> bool:
-    """Return whether the four non-thumb fingers are clearly extended."""
-    if landmarks is None or len(landmarks) < 21:
-        return False
-
-    wrist = landmarks[0]
-    for jointIndex, tipIndex in FINGER_JOINT_INDICES:
-        jointDistance = getLandmarkDistance(wrist, landmarks[jointIndex])
-        tipDistance = getLandmarkDistance(wrist, landmarks[tipIndex])
-        if tipDistance < jointDistance * OPEN_PALM_EXTENSION_RATIO:
-            return False
-
-    return True
-
-
-def getLandmarkDistance(first: Any, second: Any) -> float:
-    """Return the Euclidean distance between two normalized landmarks."""
-    return float(
-        np.sqrt(
-            (first.x - second.x) ** 2
-            + (first.y - second.y) ** 2
-            + (first.z - second.z) ** 2
-        )
-    )

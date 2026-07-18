@@ -4,14 +4,6 @@ from collections.abc import Callable
 from typing import Any
 
 
-BUILT_IN_GESTURES = (
-    "open-palm",
-    "fist",
-    "pointing",
-    "thumbs-up",
-    "thumbs-down",
-    "peace-sign",
-)
 GESTURES_KEY = "gestures"
 OPEN_APPLICATION_ACTION = "open-app"
 
@@ -57,8 +49,5 @@ class MainWindowController:
         self.deleteGestureMapping(self.config, gestureLabel)
 
     def getGestureType(self, gestureLabel: str) -> str:
-        """Return whether a mapping is built-in or user-defined."""
-        if gestureLabel in BUILT_IN_GESTURES:
-            return "builtin"
-
+        """Return the only supported gesture source: local training."""
         return "custom"
