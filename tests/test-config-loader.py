@@ -26,7 +26,7 @@ def test_loadConfigCreatesDefaultConfigWhenFileIsMissing(
         "gestures": [],
         "settings": {
             "confidenceThreshold": 0.80,
-            "cooldownSeconds": 5,
+            "cooldownSeconds": 1,
         },
     }
     assert configPath.exists()
@@ -65,7 +65,7 @@ def test_deleteGestureMappingRemovesMappingFromLocalConfig(
         ],
         "settings": {
             "confidenceThreshold": 0.80,
-            "cooldownSeconds": 5,
+            "cooldownSeconds": 1,
         },
     }
     configLoader.saveConfig(config, configPath)
