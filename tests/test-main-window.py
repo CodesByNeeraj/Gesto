@@ -4,6 +4,8 @@ import importlib.util
 from pathlib import Path
 from unittest.mock import Mock
 
+import pytest
+
 
 PROJECT_ROOT = Path(__file__).parents[1]
 MODULE_PATH = PROJECT_ROOT / "src" / "ui" / "mapping-controller.py"
@@ -51,6 +53,26 @@ def test_saveMappingIgnoresValueForNonApplicationActions() -> None:
     assert config["gestures"][0]["value"] is None
 
 
+def test_saveMappingRejectsConflictingActionForExistingGesture() -> None:
+    existingMapping = {
+        "id": "my-open-palm",
+        "type": "custom",
+        "action": "take-screenshot",
+        "value": None,
+    }
+    config = {"gestures": [existingMapping], "settings": {}}
+    controller = mappingController.MainWindowController(
+        config,
+        Mock(),
+        Mock(),
+    )
+
+    with pytest.raises(ValueError, match="already mapped"):
+        controller.saveMapping("my-open-palm", "lock-screen", None)
+
+    assert config["gestures"] == [existingMapping]
+
+
 def test_mainWindowProvidesRetrainControlForSelectedGesture() -> None:
     source = WINDOW_PATH.read_text()
 
@@ -68,3 +90,9 @@ def test_mainWindowProvidesInstalledApplicationSuggestions() -> None:
     assert "valueEntry.delete" not in source
     assert "Select from the dropdown or type in the box." in source
     assert "if isApplicationAction:" in source
+
+
+def test_mainWindowExplainsConflictingGestureMapping() -> None:
+    source = WINDOW_PATH.read_text()
+
+    assert "Remove the existing mapping first." in source

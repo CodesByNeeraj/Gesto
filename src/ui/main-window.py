@@ -224,11 +224,19 @@ class MainWindow(ctk.CTk):
         actionValue = self.valueEntry.get().strip()
         if actionValue == APPLICATION_NAME_PLACEHOLDER:
             actionValue = ""
-        self.controller.saveMapping(
-            self.gestureMenu.get(),
-            self.actionMenu.get(),
-            actionValue or None,
-        )
+        try:
+            self.controller.saveMapping(
+                self.gestureMenu.get(),
+                self.actionMenu.get(),
+                actionValue or None,
+            )
+        except ValueError as error:
+            self.statusLabel.configure(
+                text=f"{error} Remove the existing mapping first.",
+                text_color="#f87171",
+            )
+            return
+
         self.valueEntry.set("")
         self.refreshMappings()
         self.saveButton.configure(text="Saved Mapping", fg_color="#16a34a")
