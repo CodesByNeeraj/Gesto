@@ -68,10 +68,8 @@ def test_executeActionMovesToNextBrowserTab() -> None:
 
     commandRunner.assert_called_once_with(
         [
-            "osascript",
-            "-e",
-            'tell application "System Events" to keystroke tab using '
-            "{command down}",
+            actionExecutor.SWIFT_EXECUTABLE,
+            str(actionExecutor.TAB_CONTROL_SCRIPT_PATH),
         ],
         check=True,
     )
@@ -85,10 +83,9 @@ def test_executeActionMovesToPreviousBrowserTab() -> None:
 
     commandRunner.assert_called_once_with(
         [
-            "osascript",
-            "-e",
-            'tell application "System Events" to keystroke tab using '
-            "{command down, shift down}",
+            actionExecutor.SWIFT_EXECUTABLE,
+            str(actionExecutor.TAB_CONTROL_SCRIPT_PATH),
+            "--previous",
         ],
         check=True,
     )
