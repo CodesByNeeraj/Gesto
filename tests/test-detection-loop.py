@@ -2,6 +2,7 @@
 
 import importlib.util
 from pathlib import Path
+import subprocess
 from unittest.mock import Mock
 
 import numpy as np
@@ -105,6 +106,33 @@ def test_processNextFrameReportsExecutedAction() -> None:
     loop.processNextFrame()
 
     onActionExecuted.assert_called_once_with("open-palm", action)
+
+
+def test_processNextFrameReportsActionFailureWithoutStoppingLoop() -> None:
+    cameraHandler = Mock()
+    cameraHandler.captureFrame.return_value = np.zeros((480, 640, 3))
+    gestureDetector = Mock()
+    gestureDetector.detectGesture.return_value = ("open-palm", 0.92)
+    action = {"action": "open-app", "value": "Missing App"}
+    executeAction = Mock(
+        side_effect=subprocess.CalledProcessError(1, ["open", "-a"])
+    )
+    onActionFailed = Mock()
+    loop = detectionLoop.DetectionLoop(
+        cameraHandler,
+        gestureDetector,
+        Mock(return_value=action),
+        executeAction,
+        createConfig(),
+        Mock(return_value=100.0),
+        onActionFailed=onActionFailed,
+    )
+
+    wasActionExecuted = loop.processNextFrame()
+
+    assert wasActionExecuted is False
+    gestureDetector.resetTracking.assert_called_once_with()
+    onActionFailed.assert_called_once()
 
 
 def createConfig() -> dict[str, object]:
