@@ -125,11 +125,18 @@ class MainWindow(ctk.CTk):
         )
         self.valueEntry.grid(row=3, column=0, sticky="ew", padx=18, pady=8)
         self.updateActionValueField(self.actionMenu.get())
-        ctk.CTkButton(
+        self.saveButton = ctk.CTkButton(
             formFrame,
             text="Save Mapping",
             command=self.saveMapping,
-        ).grid(row=4, column=0, sticky="ew", padx=18, pady=(8, 18))
+        )
+        self.saveButton.grid(
+            row=4,
+            column=0,
+            sticky="ew",
+            padx=18,
+            pady=(8, 18),
+        )
         self.trainButton = ctk.CTkButton(
             formFrame,
             text="Train a custom gesture",
@@ -205,6 +212,12 @@ class MainWindow(ctk.CTk):
         )
         self.valueEntry.delete(0, "end")
         self.refreshMappings()
+        self.saveButton.configure(text="Saved Mapping", fg_color="#16a34a")
+        self.after(2000, self.restoreSaveButton)
+
+    def restoreSaveButton(self) -> None:
+        """Restore the mapping-save button after its brief success feedback."""
+        self.saveButton.configure(text="Save Mapping", fg_color="#1f6aa5")
 
     def updateActionValueField(self, actionName: str) -> None:
         """Only accept an application name when opening a named app."""
