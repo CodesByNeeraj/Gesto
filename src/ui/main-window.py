@@ -243,12 +243,13 @@ class MainWindow(ctk.CTk):
         isApplicationAction = actionName == OPEN_APPLICATION_ACTION
         entryState = "normal" if isApplicationAction else "disabled"
         self.valueEntry.configure(state=entryState)
-        if isApplicationAction and not self.valueEntry.get():
-            self.valueEntry.set(APPLICATION_NAME_PLACEHOLDER)
+        if isApplicationAction:
             self.applicationHintLabel.configure(
                 text="Select from the dropdown or type in the box."
             )
-        elif not isApplicationAction:
+            if not self.valueEntry.get():
+                self.valueEntry.set(APPLICATION_NAME_PLACEHOLDER)
+        else:
             self.valueEntry.set("")
             self.applicationHintLabel.configure(text="")
 
