@@ -2,6 +2,7 @@
 
 import importlib.util
 from pathlib import Path
+import shutil
 from types import SimpleNamespace
 
 import pytest
@@ -81,6 +82,34 @@ def test_listCustomGestureLabelsReturnsSavedGestureNames(
     labels = customTrainer.listCustomGestureLabels(tmp_path)
 
     assert labels == ["three-finger-tap"]
+
+
+def test_listCustomGestureLabelsDeduplicatesWhitespaceVariants(
+    tmp_path: Path,
+) -> None:
+    samples = [createLandmarks(index * 0.001) for index in range(20)]
+    modelPath = customTrainer.trainCustomGesture(
+        "three-finger-tap",
+        samples,
+        tmp_path,
+    )
+    shutil.copy(modelPath, tmp_path / "three-finger-tap .joblib")
+
+    labels = customTrainer.listCustomGestureLabels(tmp_path)
+
+    assert labels == ["three-finger-tap"]
+
+
+def test_trainCustomGestureTrimsTheGestureLabel(tmp_path: Path) -> None:
+    samples = [createLandmarks(index * 0.001) for index in range(20)]
+
+    modelPath = customTrainer.trainCustomGesture(
+        "  three-finger-tap  ",
+        samples,
+        tmp_path,
+    )
+
+    assert modelPath == tmp_path / "three-finger-tap.joblib"
 
 
 def createLandmarks(offset: float) -> list[SimpleNamespace]:
