@@ -36,22 +36,3 @@ def test_trainCollectsTargetSamplesAndSavesGesture() -> None:
     trainCustomGesture.assert_called_once()
     assert len(trainCustomGesture.call_args.args[1]) == 3
     cameraHandler.releaseCamera.assert_called_once_with()
-
-
-def test_movementTrainingCollectsThreeSequences() -> None:
-    cameraHandler = Mock()
-    cameraHandler.openCamera.return_value = True
-    cameraHandler.captureFrame.return_value = object()
-    trainMovementGesture = Mock(return_value=Path("movement.joblib"))
-    session = trainingSession.MovementTrainingSession(
-        cameraHandler,
-        Mock(return_value=[object()] * 21),
-        trainMovementGesture,
-        waitForNextFrame=lambda: None,
-    )
-
-    modelPath = session.train("swipe-right")
-
-    assert modelPath == Path("movement.joblib")
-    recordings = trainMovementGesture.call_args.args[1]
-    assert len(recordings) == 3

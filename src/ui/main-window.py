@@ -31,7 +31,6 @@ class MainWindow(ctk.CTk):
         stopDetection: Callable[[], None],
         getDetectionStatus: Callable[[], str],
         startCustomTraining: Callable[[str], Any],
-        startMovementTraining: Callable[[str], Any],
         getCustomGestureLabels: Callable[[], list[str]],
     ) -> None:
         super().__init__()
@@ -40,7 +39,6 @@ class MainWindow(ctk.CTk):
         self.stopDetection = stopDetection
         self.getDetectionStatus = getDetectionStatus
         self.startCustomTraining = startCustomTraining
-        self.startMovementTraining = startMovementTraining
         self.getCustomGestureLabels = getCustomGestureLabels
         self.trainingEvents: queue.Queue[tuple[str, Any]] = queue.Queue()
         self.isDetecting = False
@@ -151,20 +149,6 @@ class MainWindow(ctk.CTk):
             padx=18,
             pady=(0, 8),
         )
-        self.movementButton = ctk.CTkButton(
-            formFrame,
-            text="Record a movement gesture",
-            fg_color="transparent",
-            border_width=1,
-            command=self.openMovementDialog,
-        )
-        self.movementButton.grid(
-            row=6,
-            column=0,
-            sticky="ew",
-            padx=18,
-            pady=(0, 8),
-        )
         self.trainingHintLabel = ctk.CTkLabel(
             formFrame,
             text="",
@@ -172,7 +156,7 @@ class MainWindow(ctk.CTk):
             wraplength=280,
         )
         self.trainingHintLabel.grid(
-            row=7,
+            row=6,
             column=0,
             sticky="w",
             padx=18,
@@ -251,38 +235,10 @@ class MainWindow(ctk.CTk):
             daemon=True,
         ).start()
 
-    def openMovementDialog(self) -> None:
-        """Name and start a three-pass local movement recording session."""
-        dialog = ctk.CTkInputDialog(
-            text="Name this movement (for example: swipe-right)",
-            title="Record a movement gesture",
-        )
-        gestureLabel = dialog.get_input()
-        if not gestureLabel:
-            return
-
-        self.statusLabel.configure(
-            text="Recording movement three times…",
-            text_color="#60a5fa",
-        )
-        threading.Thread(
-            target=self.runMovementTraining,
-            args=(gestureLabel,),
-            daemon=True,
-        ).start()
-
     def runCustomTraining(self, gestureLabel: str) -> None:
         """Run camera training outside the UI event loop."""
         try:
             self.startCustomTraining(gestureLabel)
-            self.trainingEvents.put(("complete", gestureLabel))
-        except Exception as error:
-            self.trainingEvents.put(("error", str(error)))
-
-    def runMovementTraining(self, gestureLabel: str) -> None:
-        """Run movement capture outside the UI event loop."""
-        try:
-            self.startMovementTraining(gestureLabel)
             self.trainingEvents.put(("complete", gestureLabel))
         except Exception as error:
             self.trainingEvents.put(("error", str(error)))
@@ -369,7 +325,6 @@ class MainWindow(ctk.CTk):
             )
             self.toggleButton.configure(text="Start Detection")
             self.trainButton.configure(state="normal")
-            self.movementButton.configure(state="normal")
             self.trainingHintLabel.configure(text="")
             return
 
@@ -381,7 +336,6 @@ class MainWindow(ctk.CTk):
             )
             self.toggleButton.configure(text="Stop Detection")
             self.trainButton.configure(state="disabled")
-            self.movementButton.configure(state="disabled")
             self.trainingHintLabel.configure(
                 text="End detection to train a custom gesture."
             )
