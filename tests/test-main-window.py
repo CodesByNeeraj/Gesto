@@ -16,7 +16,7 @@ mappingController = importlib.util.module_from_spec(MODULE_SPEC)
 MODULE_SPEC.loader.exec_module(mappingController)
 
 
-def test_saveMappingAddsBuiltInGestureMappingToConfig() -> None:
+def test_saveMappingAddsTrainedGestureMappingToConfig() -> None:
     config = {"gestures": [], "settings": {}}
     upsertGestureMapping = Mock()
     controller = mappingController.MainWindowController(
@@ -25,11 +25,11 @@ def test_saveMappingAddsBuiltInGestureMappingToConfig() -> None:
         Mock(),
     )
 
-    controller.saveMapping("open-palm", "take-screenshot", None)
+    controller.saveMapping("my-open-palm", "take-screenshot", None)
 
     expectedMapping = {
-        "id": "open-palm",
-        "type": "builtin",
+        "id": "my-open-palm",
+        "type": "custom",
         "action": "take-screenshot",
         "value": None,
     }

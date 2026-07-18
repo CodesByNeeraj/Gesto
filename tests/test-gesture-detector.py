@@ -19,7 +19,7 @@ gestureDetector = importlib.util.module_from_spec(MODULE_SPEC)
 MODULE_SPEC.loader.exec_module(gestureDetector)
 
 
-def test_detectGestureMapsMediaPipeOpenPalmToGestoLabel() -> None:
+def test_detectGestureIgnoresMediaPipeCannedGestureLabel() -> None:
     recognizer = Mock()
     recognizer.recognize_for_video.return_value = createGestureResult(
         "Open_Palm", 0.92
@@ -27,13 +27,14 @@ def test_detectGestureMapsMediaPipeOpenPalmToGestoLabel() -> None:
     detector = gestureDetector.GestureDetector(
         recognizer,
         lambda image: image,
+        Mock(return_value=None),
         timestampProvider=Mock(return_value=100),
     )
     frame = np.zeros((480, 640, 3), dtype=np.uint8)
 
     result = detector.detectGesture(frame, threshold=0.80)
 
-    assert result == ("open-palm", 0.92)
+    assert result is None
     recognizer.recognize_for_video.assert_called_once()
     assert recognizer.recognize_for_video.call_args.args[1] == 100
 
@@ -43,7 +44,11 @@ def test_detectGestureRejectsResultBelowUserConfidenceThreshold() -> None:
     recognizer.recognize_for_video.return_value = createGestureResult(
         "Closed_Fist", 0.65
     )
-    detector = gestureDetector.GestureDetector(recognizer, lambda image: image)
+    detector = gestureDetector.GestureDetector(
+        recognizer,
+        lambda image: image,
+        Mock(return_value=None),
+    )
     frame = np.zeros((480, 640, 3), dtype=np.uint8)
 
     result = detector.detectGesture(frame, threshold=0.80)
@@ -51,18 +56,22 @@ def test_detectGestureRejectsResultBelowUserConfidenceThreshold() -> None:
     assert result is None
 
 
-def test_detectGestureCorrectsFistLabelForAnOpenPalmShape() -> None:
+def test_detectGestureIgnoresCannedFistForAnOpenPalmShape() -> None:
     recognizer = Mock()
     recognizer.recognize_for_video.return_value = SimpleNamespace(
         gestures=[[SimpleNamespace(category_name="Closed_Fist", score=0.86)]],
         hand_landmarks=[createOpenPalmLandmarks()],
     )
-    detector = gestureDetector.GestureDetector(recognizer, lambda image: image)
+    detector = gestureDetector.GestureDetector(
+        recognizer,
+        lambda image: image,
+        Mock(return_value=None),
+    )
     frame = np.zeros((480, 640, 3), dtype=np.uint8)
 
     result = detector.detectGesture(frame, threshold=0.80)
 
-    assert result == ("open-palm", 0.86)
+    assert result is None
 
 
 def test_detectGestureUsesCustomModelWhenNoBuiltInGestureMatches() -> None:
