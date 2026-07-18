@@ -51,6 +51,20 @@ def test_detectGestureRejectsResultBelowUserConfidenceThreshold() -> None:
     assert result is None
 
 
+def test_detectGestureCorrectsFistLabelForAnOpenPalmShape() -> None:
+    recognizer = Mock()
+    recognizer.recognize_for_video.return_value = SimpleNamespace(
+        gestures=[[SimpleNamespace(category_name="Closed_Fist", score=0.86)]],
+        hand_landmarks=[createOpenPalmLandmarks()],
+    )
+    detector = gestureDetector.GestureDetector(recognizer, lambda image: image)
+    frame = np.zeros((480, 640, 3), dtype=np.uint8)
+
+    result = detector.detectGesture(frame, threshold=0.80)
+
+    assert result == ("open-palm", 0.86)
+
+
 def test_detectGestureUsesCustomModelWhenNoBuiltInGestureMatches() -> None:
     recognizer = Mock()
     landmarks = [SimpleNamespace(x=0.5, y=0.5, z=0.0) for _ in range(21)]
@@ -75,3 +89,11 @@ def test_detectGestureUsesCustomModelWhenNoBuiltInGestureMatches() -> None:
 def createGestureResult(label: str, score: float) -> SimpleNamespace:
     category = SimpleNamespace(category_name=label, score=score)
     return SimpleNamespace(gestures=[[category]])
+
+
+def createOpenPalmLandmarks() -> list[SimpleNamespace]:
+    landmarks = [SimpleNamespace(x=0.5, y=0.5, z=0.0) for _ in range(21)]
+    for pipIndex, tipIndex in ((6, 8), (10, 12), (14, 16), (18, 20)):
+        landmarks[pipIndex] = SimpleNamespace(x=0.5, y=0.35, z=0.0)
+        landmarks[tipIndex] = SimpleNamespace(x=0.5, y=0.10, z=0.0)
+    return landmarks
