@@ -30,3 +30,47 @@ def test_loadConfigCreatesDefaultConfigWhenFileIsMissing(
         },
     }
     assert configPath.exists()
+
+
+def test_upsertGestureMappingSavesNewMappingToLocalConfig(
+    tmp_path: Path,
+) -> None:
+    configPath = tmp_path / "config.json"
+    config = configLoader.loadConfig(configPath)
+    mapping = {
+        "id": "open-palm",
+        "type": "builtin",
+        "action": "take-screenshot",
+        "value": None,
+    }
+
+    configLoader.upsertGestureMapping(config, mapping, configPath)
+
+    savedConfig = configLoader.loadConfig(configPath)
+    assert savedConfig["gestures"] == [mapping]
+
+
+def test_deleteGestureMappingRemovesMappingFromLocalConfig(
+    tmp_path: Path,
+) -> None:
+    configPath = tmp_path / "config.json"
+    config = {
+        "gestures": [
+            {
+                "id": "open-palm",
+                "type": "builtin",
+                "action": "take-screenshot",
+                "value": None,
+            }
+        ],
+        "settings": {
+            "confidenceThreshold": 0.80,
+            "cooldownSeconds": 5,
+        },
+    }
+    configLoader.saveConfig(config, configPath)
+
+    configLoader.deleteGestureMapping(config, "open-palm", configPath)
+
+    savedConfig = configLoader.loadConfig(configPath)
+    assert savedConfig["gestures"] == []
