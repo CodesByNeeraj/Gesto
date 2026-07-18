@@ -25,7 +25,7 @@ def test_loadConfigCreatesDefaultConfigWhenFileIsMissing(
     assert config == {
         "gestures": [],
         "settings": {
-            "confidenceThreshold": 0.80,
+            "confidenceThreshold": 0.70,
             "cooldownSeconds": 1,
         },
     }

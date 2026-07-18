@@ -6,7 +6,7 @@ from typing import Any
 
 
 CONFIG_FILE_PATH = Path.home() / ".gesto" / "config.json"
-DEFAULT_CONFIDENCE_THRESHOLD = 0.80
+DEFAULT_CONFIDENCE_THRESHOLD = 0.70
 DEFAULT_COOLDOWN_SECONDS = 1
 GESTURES_KEY = "gestures"
 GESTURE_ID_KEY = "id"
