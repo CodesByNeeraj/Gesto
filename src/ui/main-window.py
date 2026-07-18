@@ -143,6 +143,18 @@ class MainWindow(ctk.CTk):
             values=self.getApplicationNames(),
         )
         self.valueEntry.grid(row=3, column=0, sticky="ew", padx=18, pady=8)
+        self.applicationHintLabel = ctk.CTkLabel(
+            formFrame,
+            text="",
+            text_color="gray70",
+        )
+        self.applicationHintLabel.grid(
+            row=4,
+            column=0,
+            sticky="w",
+            padx=18,
+            pady=(0, 4),
+        )
         self.updateActionValueField(self.actionMenu.get())
         self.saveButton = ctk.CTkButton(
             formFrame,
@@ -150,7 +162,7 @@ class MainWindow(ctk.CTk):
             command=self.saveMapping,
         )
         self.saveButton.grid(
-            row=4,
+            row=5,
             column=0,
             sticky="ew",
             padx=18,
@@ -164,7 +176,7 @@ class MainWindow(ctk.CTk):
             command=self.openTrainingDialog,
         )
         self.trainButton.grid(
-            row=5,
+            row=6,
             column=0,
             sticky="ew",
             padx=18,
@@ -177,7 +189,7 @@ class MainWindow(ctk.CTk):
             wraplength=280,
         )
         self.trainingHintLabel.grid(
-            row=6,
+            row=7,
             column=0,
             sticky="w",
             padx=18,
@@ -233,8 +245,12 @@ class MainWindow(ctk.CTk):
         self.valueEntry.configure(state=entryState)
         if isApplicationAction and not self.valueEntry.get():
             self.valueEntry.set(APPLICATION_NAME_PLACEHOLDER)
+            self.applicationHintLabel.configure(
+                text="Select from the dropdown or type in the box."
+            )
         elif not isApplicationAction:
             self.valueEntry.set("")
+            self.applicationHintLabel.configure(text="")
 
     def getGestureMenuValues(self) -> list[str]:
         """Show trained gestures, or a non-mappable training prompt."""
