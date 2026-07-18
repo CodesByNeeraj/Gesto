@@ -1,139 +1,86 @@
-"""Process local camera frames through MediaPipe hand landmarks."""
+"""Recognize built-in gestures with MediaPipe's local task model."""
 
+from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 import cv2
 import numpy as np
 
 
-DEFAULT_MAX_NUM_HANDS = 1
-DEFAULT_MIN_DETECTION_CONFIDENCE = 0.80
-DEFAULT_MIN_TRACKING_CONFIDENCE = 0.80
-FULL_CONFIDENCE = 1.0
-FIST_GESTURE = "fist"
-OPEN_PALM_GESTURE = "open-palm"
-POINTING_GESTURE = "pointing"
-WRIST_LANDMARK_INDEX = 0
-INDEX_FINGER_INDEX = 1
-FINGER_LANDMARK_PAIRS = (
-    (3, 4),
-    (6, 8),
-    (10, 12),
-    (14, 16),
-    (18, 20),
+MODEL_FILE_PATH = (
+    Path(__file__).parents[1] / "assets" / "models" / "gesture_recognizer.task"
 )
+BUILT_IN_GESTURE_LABELS = {
+    "Closed_Fist": "fist",
+    "Open_Palm": "open-palm",
+    "Pointing_Up": "pointing",
+    "Thumb_Down": "thumbs-down",
+    "Thumb_Up": "thumbs-up",
+    "Victory": "peace-sign",
+}
 
 
 class GestureDetector:
-    """Detect hands locally and provide a boundary for classification."""
+    """Recognize MediaPipe's canned gestures from local camera frames."""
 
-    def __init__(self, handProcessor: Any | None = None) -> None:
-        self.handProcessor = handProcessor or createHandProcessor()
+    def __init__(
+        self,
+        recognizer: Any | None = None,
+        imageFactory: Callable[[np.ndarray], Any] | None = None,
+    ) -> None:
+        self.recognizer = recognizer or createGestureRecognizer()
+        self.imageFactory = imageFactory or createMediaPipeImage
 
     def detectGesture(
         self, frame: np.ndarray | None, threshold: float
     ) -> tuple[str, float] | None:
-        """Process a frame and return an available classification."""
+        """Return a supported built-in gesture above the user threshold."""
         if frame is None or frame.size == 0:
             return None
 
         rgbFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        detectionResult = self.handProcessor.process(rgbFrame)
-        if not detectionResult.multi_hand_landmarks:
+        mediaPipeImage = self.imageFactory(rgbFrame)
+        recognitionResult = self.recognizer.recognize(mediaPipeImage)
+        category = getTopGestureCategory(recognitionResult)
+        if category is None:
             return None
 
-        landmarks = detectionResult.multi_hand_landmarks[0].landmark
-        classification = classifyHandLandmarks(landmarks)
-        if classification is None:
-            return None
-
-        gestureLabel, confidenceScore = classification
-        if confidenceScore < threshold:
+        gestureLabel = BUILT_IN_GESTURE_LABELS.get(category.category_name)
+        confidenceScore = float(category.score)
+        if gestureLabel is None or confidenceScore < threshold:
             return None
 
         return gestureLabel, confidenceScore
 
 
-def createHandProcessor() -> Any:
-    """Create MediaPipe's local hand-landmark processor on demand."""
+def createGestureRecognizer() -> Any:
+    """Create the local MediaPipe canned-gesture recognizer."""
+    if not MODEL_FILE_PATH.exists():
+        raise FileNotFoundError(f"Gesture model is missing: {MODEL_FILE_PATH}")
+
     import mediapipe as mp
 
-    return mp.solutions.hands.Hands(
-        max_num_hands=DEFAULT_MAX_NUM_HANDS,
-        min_detection_confidence=DEFAULT_MIN_DETECTION_CONFIDENCE,
-        min_tracking_confidence=DEFAULT_MIN_TRACKING_CONFIDENCE,
+    baseOptions = mp.tasks.BaseOptions(
+        model_asset_path=str(MODEL_FILE_PATH),
+        delegate=mp.tasks.BaseOptions.Delegate.CPU,
     )
-
-
-def classifyHandLandmarks(
-    landmarks: list[Any],
-) -> tuple[str, float] | None:
-    """Classify supported gestures from one hand's landmark positions."""
-    if not areAllFingersExtended(landmarks):
-        if areAllFingersFolded(landmarks):
-            return FIST_GESTURE, FULL_CONFIDENCE
-
-        if areOnlyFingersExtended(landmarks, {INDEX_FINGER_INDEX}):
-            return POINTING_GESTURE, FULL_CONFIDENCE
-
-    else:
-        return OPEN_PALM_GESTURE, FULL_CONFIDENCE
-
-    return None
-
-
-def areAllFingersExtended(landmarks: list[Any]) -> bool:
-    """Return whether every fingertip extends beyond its preceding joint."""
-    if len(landmarks) <= FINGER_LANDMARK_PAIRS[-1][1]:
-        return False
-
-    wrist = landmarks[WRIST_LANDMARK_INDEX]
-    return all(
-        isFingerExtended(landmarks, wrist, jointIndex, tipIndex)
-        for jointIndex, tipIndex in FINGER_LANDMARK_PAIRS
+    options = mp.tasks.vision.GestureRecognizerOptions(
+        base_options=baseOptions
     )
+    return mp.tasks.vision.GestureRecognizer.create_from_options(options)
 
 
-def areAllFingersFolded(landmarks: list[Any]) -> bool:
-    """Return whether every fingertip is closer to the wrist than its joint."""
-    if len(landmarks) <= FINGER_LANDMARK_PAIRS[-1][1]:
-        return False
+def createMediaPipeImage(rgbFrame: np.ndarray) -> Any:
+    """Convert an OpenCV RGB frame to a MediaPipe image."""
+    import mediapipe as mp
 
-    wrist = landmarks[WRIST_LANDMARK_INDEX]
-    return all(
-        not isFingerExtended(landmarks, wrist, jointIndex, tipIndex)
-        for jointIndex, tipIndex in FINGER_LANDMARK_PAIRS
-    )
+    return mp.Image(image_format=mp.ImageFormat.SRGB, data=rgbFrame)
 
 
-def areOnlyFingersExtended(
-    landmarks: list[Any], extendedFingerIndices: set[int]
-) -> bool:
-    """Return whether exactly the selected fingers extend."""
-    if len(landmarks) <= FINGER_LANDMARK_PAIRS[-1][1]:
-        return False
+def getTopGestureCategory(recognitionResult: Any) -> Any | None:
+    """Return the highest-scoring category for the first detected hand."""
+    if not recognitionResult.gestures or not recognitionResult.gestures[0]:
+        return None
 
-    wrist = landmarks[WRIST_LANDMARK_INDEX]
-    return all(
-        isFingerExtended(landmarks, wrist, jointIndex, tipIndex)
-        == (fingerIndex in extendedFingerIndices)
-        for fingerIndex, (jointIndex, tipIndex) in enumerate(
-            FINGER_LANDMARK_PAIRS
-        )
-    )
-
-
-def isFingerExtended(
-    landmarks: list[Any], wrist: Any, jointIndex: int, tipIndex: int
-) -> bool:
-    """Return whether a fingertip extends beyond its preceding joint."""
-    jointDistance = calculateSquaredDistance(wrist, landmarks[jointIndex])
-    tipDistance = calculateSquaredDistance(wrist, landmarks[tipIndex])
-    return tipDistance > jointDistance
-
-
-def calculateSquaredDistance(firstPoint: Any, secondPoint: Any) -> float:
-    """Return squared two-dimensional distance between MediaPipe landmarks."""
-    horizontalDistance = firstPoint.x - secondPoint.x
-    verticalDistance = firstPoint.y - secondPoint.y
-    return horizontalDistance**2 + verticalDistance**2
+    return recognitionResult.gestures[0][0]
