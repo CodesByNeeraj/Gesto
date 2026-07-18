@@ -44,6 +44,19 @@ def test_trainCustomGestureSavesLocalModelAfterTwentySamples(
     assert savedModel["gestureLabel"] == "three-finger-tap"
 
 
+def test_findSimilarGestureReturnsExistingGestureForMatchingSamples(
+    tmp_path: Path,
+) -> None:
+    samples = [
+        createLandmarks(sampleIndex * 0.001) for sampleIndex in range(20)
+    ]
+    customTrainer.trainCustomGesture("three-finger-tap", samples, tmp_path)
+
+    similarGesture = customTrainer.findSimilarGesture(samples, tmp_path)
+
+    assert similarGesture == "three-finger-tap"
+
+
 def createLandmarks(offset: float) -> list[SimpleNamespace]:
     return [
         SimpleNamespace(x=index * 0.01 + offset, y=index * 0.02, z=0.0)
