@@ -35,13 +35,13 @@ class MainWindowController:
             "value": actionValue,
         }
         gestures = self.config[GESTURES_KEY]
-        for index, existingMapping in enumerate(gestures):
+        for existingMapping in gestures:
             if existingMapping["id"] == gestureLabel:
-                gestures[index] = mapping
-                break
-        else:
-            gestures.append(mapping)
+                if existingMapping != mapping:
+                    raise ValueError(f"{gestureLabel} is already mapped.")
+                return
 
+        gestures.append(mapping)
         self.upsertGestureMapping(self.config, mapping)
 
     def removeMapping(self, gestureLabel: str) -> None:
