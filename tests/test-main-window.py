@@ -35,3 +35,16 @@ def test_saveMappingAddsBuiltInGestureMappingToConfig() -> None:
     }
     assert config["gestures"] == [expectedMapping]
     upsertGestureMapping.assert_called_once_with(config, expectedMapping)
+
+
+def test_saveMappingIgnoresValueForNonApplicationActions() -> None:
+    config = {"gestures": [], "settings": {}}
+    controller = mappingController.MainWindowController(
+        config,
+        Mock(),
+        Mock(),
+    )
+
+    controller.saveMapping("thumbs-down", "take-screenshot", "Spotify")
+
+    assert config["gestures"][0]["value"] is None
