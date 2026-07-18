@@ -86,6 +86,28 @@ def test_detectGestureUsesCustomModelWhenNoBuiltInGestureMatches() -> None:
     customDetector.assert_called_once_with(landmarks)
 
 
+def test_detectGesturePrefersTrainedGestureOverBuiltInLabel() -> None:
+    recognizer = Mock()
+    landmarks = [SimpleNamespace(x=0.5, y=0.5, z=0.0) for _ in range(21)]
+    recognizer.recognize_for_video.return_value = SimpleNamespace(
+        gestures=[[SimpleNamespace(category_name="Closed_Fist", score=0.95)]],
+        hand_landmarks=[SimpleNamespace(landmark=landmarks)],
+    )
+    customDetector = Mock(return_value=("my-palm", 0.91))
+    detector = gestureDetector.GestureDetector(
+        recognizer,
+        lambda image: image,
+        customDetector,
+    )
+
+    result = detector.detectGesture(
+        np.zeros((480, 640, 3), dtype=np.uint8),
+        threshold=0.80,
+    )
+
+    assert result == ("my-palm", 0.91)
+
+
 def test_resetTrackingRecreatesTheVideoRecognizer() -> None:
     recognizer = Mock()
     recognizerFactory = Mock(return_value=Mock())
