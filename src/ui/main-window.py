@@ -26,11 +26,13 @@ class MainWindow(ctk.CTk):
         controller: Any,
         startDetection: Callable[[], bool],
         stopDetection: Callable[[], None],
+        getDetectionStatus: Callable[[], str],
     ) -> None:
         super().__init__()
         self.controller = controller
         self.startDetection = startDetection
         self.stopDetection = stopDetection
+        self.getDetectionStatus = getDetectionStatus
         self.isDetecting = False
 
         self.title("Gesto")
@@ -39,6 +41,7 @@ class MainWindow(ctk.CTk):
         self.protocol("WM_DELETE_WINDOW", self.closeWindow)
         self.createLayout()
         self.refreshMappings()
+        self.after(250, self.refreshDetectionStatus)
 
     def createLayout(self) -> None:
         """Create the application header, mapping form, and status controls."""
@@ -219,6 +222,16 @@ class MainWindow(ctk.CTk):
             text="Camera unavailable. Check macOS camera permissions.",
             text_color="#f87171",
         )
+
+    def refreshDetectionStatus(self) -> None:
+        """Show the latest background detector status in the UI thread."""
+        if self.isDetecting:
+            self.statusLabel.configure(
+                text=self.getDetectionStatus(),
+                text_color="#4ade80",
+            )
+
+        self.after(250, self.refreshDetectionStatus)
 
     def closeWindow(self) -> None:
         """Stop detection before closing the settings window."""

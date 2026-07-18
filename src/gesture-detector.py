@@ -3,6 +3,7 @@
 from collections.abc import Callable
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
+import time
 from typing import Any
 
 import cv2
@@ -32,12 +33,15 @@ class GestureDetector:
         customGestureDetector: Callable[
             [list[Any]], tuple[str, float] | None
         ] | None = None,
+        timestampProvider: Callable[[], int] | None = None,
     ) -> None:
         self.recognizer = recognizer or createGestureRecognizer()
         self.imageFactory = imageFactory or createMediaPipeImage
         self.customGestureDetector = (
             customGestureDetector or createCustomGestureDetector()
         )
+        self.timestampProvider = timestampProvider or getTimestampMilliseconds
+        self.lastTimestampMilliseconds = -1
 
     def detectGesture(
         self, frame: np.ndarray | None, threshold: float
@@ -48,7 +52,10 @@ class GestureDetector:
 
         rgbFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         mediaPipeImage = self.imageFactory(rgbFrame)
-        recognitionResult = self.recognizer.recognize(mediaPipeImage)
+        recognitionResult = self.recognizer.recognize_for_video(
+            mediaPipeImage,
+            self.getNextTimestampMilliseconds(),
+        )
         category = getTopGestureCategory(recognitionResult)
         if category is not None:
             gestureLabel = BUILT_IN_GESTURE_LABELS.get(category.category_name)
@@ -70,6 +77,15 @@ class GestureDetector:
 
         return gestureLabel, confidenceScore
 
+    def getNextTimestampMilliseconds(self) -> int:
+        """Return a strictly increasing timestamp for MediaPipe video mode."""
+        timestampMilliseconds = self.timestampProvider()
+        self.lastTimestampMilliseconds = max(
+            timestampMilliseconds,
+            self.lastTimestampMilliseconds + 1,
+        )
+        return self.lastTimestampMilliseconds
+
 
 def createGestureRecognizer() -> Any:
     """Create the local MediaPipe canned-gesture recognizer."""
@@ -83,7 +99,8 @@ def createGestureRecognizer() -> Any:
         delegate=mp.tasks.BaseOptions.Delegate.CPU,
     )
     options = mp.tasks.vision.GestureRecognizerOptions(
-        base_options=baseOptions
+        base_options=baseOptions,
+        running_mode=mp.tasks.vision.RunningMode.VIDEO,
     )
     return mp.tasks.vision.GestureRecognizer.create_from_options(options)
 
@@ -93,6 +110,11 @@ def createMediaPipeImage(rgbFrame: np.ndarray) -> Any:
     import mediapipe as mp
 
     return mp.Image(image_format=mp.ImageFormat.SRGB, data=rgbFrame)
+
+
+def getTimestampMilliseconds() -> int:
+    """Return a monotonic timestamp suitable for MediaPipe video processing."""
+    return time.monotonic_ns() // 1_000_000
 
 
 def createCustomGestureDetector() -> Callable[

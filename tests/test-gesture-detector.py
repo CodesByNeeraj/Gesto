@@ -21,18 +21,26 @@ MODULE_SPEC.loader.exec_module(gestureDetector)
 
 def test_detectGestureMapsMediaPipeOpenPalmToGestoLabel() -> None:
     recognizer = Mock()
-    recognizer.recognize.return_value = createGestureResult("Open_Palm", 0.92)
-    detector = gestureDetector.GestureDetector(recognizer, lambda image: image)
+    recognizer.recognize_for_video.return_value = createGestureResult(
+        "Open_Palm", 0.92
+    )
+    detector = gestureDetector.GestureDetector(
+        recognizer,
+        lambda image: image,
+        timestampProvider=Mock(return_value=100),
+    )
     frame = np.zeros((480, 640, 3), dtype=np.uint8)
 
     result = detector.detectGesture(frame, threshold=0.80)
 
     assert result == ("open-palm", 0.92)
+    recognizer.recognize_for_video.assert_called_once()
+    assert recognizer.recognize_for_video.call_args.args[1] == 100
 
 
 def test_detectGestureRejectsResultBelowUserConfidenceThreshold() -> None:
     recognizer = Mock()
-    recognizer.recognize.return_value = createGestureResult(
+    recognizer.recognize_for_video.return_value = createGestureResult(
         "Closed_Fist", 0.65
     )
     detector = gestureDetector.GestureDetector(recognizer, lambda image: image)
@@ -46,7 +54,7 @@ def test_detectGestureRejectsResultBelowUserConfidenceThreshold() -> None:
 def test_detectGestureUsesCustomModelWhenNoBuiltInGestureMatches() -> None:
     recognizer = Mock()
     landmarks = [SimpleNamespace(x=0.5, y=0.5, z=0.0) for _ in range(21)]
-    recognizer.recognize.return_value = SimpleNamespace(
+    recognizer.recognize_for_video.return_value = SimpleNamespace(
         gestures=[],
         hand_landmarks=[SimpleNamespace(landmark=landmarks)],
     )

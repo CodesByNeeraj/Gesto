@@ -63,6 +63,49 @@ def test_processNextFrameIgnoresGestureDuringItsCooldown() -> None:
     executeAction.assert_called_once()
 
 
+def test_processNextFrameReportsDetectedGestureBeforeMappingAction() -> None:
+    cameraHandler = Mock()
+    cameraHandler.captureFrame.return_value = np.zeros((480, 640, 3))
+    gestureDetector = Mock()
+    gestureDetector.detectGesture.return_value = ("open-palm", 0.92)
+    onDetection = Mock()
+    loop = detectionLoop.DetectionLoop(
+        cameraHandler,
+        gestureDetector,
+        Mock(return_value=None),
+        Mock(),
+        createConfig(),
+        Mock(return_value=100.0),
+        onDetection,
+    )
+
+    loop.processNextFrame()
+
+    onDetection.assert_called_once_with("open-palm", 0.92)
+
+
+def test_processNextFrameReportsExecutedAction() -> None:
+    cameraHandler = Mock()
+    cameraHandler.captureFrame.return_value = np.zeros((480, 640, 3))
+    gestureDetector = Mock()
+    gestureDetector.detectGesture.return_value = ("open-palm", 0.92)
+    onActionExecuted = Mock()
+    action = {"action": "take-screenshot"}
+    loop = detectionLoop.DetectionLoop(
+        cameraHandler,
+        gestureDetector,
+        Mock(return_value=action),
+        Mock(),
+        createConfig(),
+        Mock(return_value=100.0),
+        onActionExecuted=onActionExecuted,
+    )
+
+    loop.processNextFrame()
+
+    onActionExecuted.assert_called_once_with("open-palm", action)
+
+
 def createConfig() -> dict[str, object]:
     return {
         "gestures": [],
