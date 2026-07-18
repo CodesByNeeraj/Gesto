@@ -91,6 +91,14 @@ def test_executeActionMovesToPreviousBrowserTab() -> None:
     )
 
 
+def test_tabControlUsesStandardControlTabBrowserShortcut() -> None:
+    script = actionExecutor.TAB_CONTROL_SCRIPT_PATH.read_text()
+
+    assert "let controlKey: CGKeyCode = 59" in script
+    assert "postKey(controlKey, true)" in script
+    assert "postKey(controlKey, false)" in script
+
+
 def test_executeActionLocksTheScreen() -> None:
     commandRunner = Mock()
     executor = actionExecutor.ActionExecutor(commandRunner)
