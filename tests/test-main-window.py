@@ -56,3 +56,11 @@ def test_mainWindowProvidesRetrainControlForSelectedGesture() -> None:
 
     assert 'text="Retrain"' in source
     assert "command=self.retrainSelectedGesture" in source
+    assert "self.retrainButton.configure(state=\"disabled\")" in source
+
+
+def test_mainWindowProvidesInstalledApplicationSuggestions() -> None:
+    source = WINDOW_PATH.read_text()
+
+    assert "CTkComboBox" in source
+    assert "Choose installed app or type a name" in source
