@@ -38,6 +38,7 @@ def test_processNextFrameExecutesMappedActionForDetectedGesture() -> None:
 
     assert wasActionExecuted is True
     executeAction.assert_called_once_with({"action": "take-screenshot"})
+    gestureDetector.resetTracking.assert_called_once_with()
 
 
 def test_processNextFrameIgnoresGestureDuringItsCooldown() -> None:
