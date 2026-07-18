@@ -14,6 +14,7 @@ assert MODULE_SPEC is not None
 assert MODULE_SPEC.loader is not None
 mappingController = importlib.util.module_from_spec(MODULE_SPEC)
 MODULE_SPEC.loader.exec_module(mappingController)
+WINDOW_PATH = PROJECT_ROOT / "src" / "ui" / "main-window.py"
 
 
 def test_saveMappingAddsTrainedGestureMappingToConfig() -> None:
@@ -48,3 +49,10 @@ def test_saveMappingIgnoresValueForNonApplicationActions() -> None:
     controller.saveMapping("thumbs-down", "take-screenshot", "Spotify")
 
     assert config["gestures"][0]["value"] is None
+
+
+def test_mainWindowProvidesRetrainControlForSelectedGesture() -> None:
+    source = WINDOW_PATH.read_text()
+
+    assert 'text="Retrain"' in source
+    assert "command=self.retrainSelectedGesture" in source
