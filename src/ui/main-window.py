@@ -9,6 +9,7 @@ import customtkinter as ctk
 
 
 CUSTOM_GESTURE_PLACEHOLDER = "train-a-custom-gesture-first"
+APPLICATION_NAME_PLACEHOLDER = "Choose installed app or type a name"
 SUPPORTED_ACTIONS = (
     "take-screenshot",
     "open-app",
@@ -140,7 +141,6 @@ class MainWindow(ctk.CTk):
         self.valueEntry = ctk.CTkComboBox(
             formFrame,
             values=self.getApplicationNames(),
-            placeholder_text="Choose installed app or type a name",
         )
         self.valueEntry.grid(row=3, column=0, sticky="ew", padx=18, pady=8)
         self.updateActionValueField(self.actionMenu.get())
@@ -209,11 +209,13 @@ class MainWindow(ctk.CTk):
 
     def saveMapping(self) -> None:
         """Save the current form values and refresh the mappings list."""
-        actionValue = self.valueEntry.get().strip() or None
+        actionValue = self.valueEntry.get().strip()
+        if actionValue == APPLICATION_NAME_PLACEHOLDER:
+            actionValue = ""
         self.controller.saveMapping(
             self.gestureMenu.get(),
             self.actionMenu.get(),
-            actionValue,
+            actionValue or None,
         )
         self.valueEntry.delete(0, "end")
         self.refreshMappings()
@@ -229,7 +231,9 @@ class MainWindow(ctk.CTk):
         isApplicationAction = actionName == OPEN_APPLICATION_ACTION
         entryState = "normal" if isApplicationAction else "disabled"
         self.valueEntry.configure(state=entryState)
-        if not isApplicationAction:
+        if isApplicationAction and not self.valueEntry.get():
+            self.valueEntry.set(APPLICATION_NAME_PLACEHOLDER)
+        elif not isApplicationAction:
             self.valueEntry.delete(0, "end")
 
     def getGestureMenuValues(self) -> list[str]:
