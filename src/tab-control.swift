@@ -1,8 +1,9 @@
 import AppKit
 
-let controlKey: CGKeyCode = 59
-let shiftKey: CGKeyCode = 56
-let tabKey: CGKeyCode = 48
+let commandKey: CGKeyCode = 55
+let optionKey: CGKeyCode = 58
+let rightArrowKey: CGKeyCode = 124
+let leftArrowKey: CGKeyCode = 123
 let isPreviousTab = CommandLine.arguments.contains("--previous")
 
 func postKey(_ key: CGKeyCode, _ isDown: Bool) {
@@ -14,13 +15,10 @@ func postKey(_ key: CGKeyCode, _ isDown: Bool) {
     event?.post(tap: .cghidEventTap)
 }
 
-postKey(controlKey, true)
-if isPreviousTab {
-    postKey(shiftKey, true)
-}
-postKey(tabKey, true)
-postKey(tabKey, false)
-if isPreviousTab {
-    postKey(shiftKey, false)
-}
-postKey(controlKey, false)
+postKey(commandKey, true)
+postKey(optionKey, true)
+let tabDirectionKey = isPreviousTab ? leftArrowKey : rightArrowKey
+postKey(tabDirectionKey, true)
+postKey(tabDirectionKey, false)
+postKey(optionKey, false)
+postKey(commandKey, false)
