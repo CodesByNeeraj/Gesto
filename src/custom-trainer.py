@@ -60,6 +60,17 @@ def loadCustomGestureModel(modelPath: Path) -> dict[str, Any]:
     return joblib.load(modelPath)
 
 
+def listCustomGestureLabels(
+    modelDirectory: Path = MODEL_DIRECTORY,
+) -> list[str]:
+    """Return locally trained gesture labels in a stable order."""
+    if not modelDirectory.exists():
+        return []
+
+    modelPaths = modelDirectory.glob("*.joblib")
+    return sorted(modelPath.stem for modelPath in modelPaths)
+
+
 def findSimilarGesture(
     landmarkSamples: list[list[Any]],
     modelDirectory: Path = MODEL_DIRECTORY,

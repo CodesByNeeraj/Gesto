@@ -18,6 +18,8 @@ class GestoApplication:
         detectorModule = loadModule("gesture-detector.py", "gestureDetector")
         mapperModule = loadModule("action-mapper.py", "actionMapper")
         executorModule = loadModule("action-executor.py", "actionExecutor")
+        trainerModule = loadModule("custom-trainer.py", "customTrainer")
+        trainingModule = loadModule("training-session.py", "trainingSession")
         loopModule = loadModule("detection-loop.py", "detectionLoop")
         controllerModule = loadModule(
             "ui/mapping-controller.py", "mappingController"
@@ -28,6 +30,12 @@ class GestoApplication:
         self.cameraHandler = cameraModule.CameraHandler()
         self.gestureDetector = detectorModule.GestureDetector()
         self.actionExecutor = executorModule.ActionExecutor()
+        self.customTrainer = trainerModule
+        self.trainingSession = trainingModule.TrainingSession(
+            self.cameraHandler,
+            self.gestureDetector.extractLandmarks,
+            self.customTrainer.trainCustomGesture,
+        )
         self.statusLock = threading.Lock()
         self.detectionStatus = "Ready to start detection"
         self.detectionLoop = loopModule.DetectionLoop(
@@ -54,6 +62,8 @@ class GestoApplication:
             self.startDetection,
             self.stopDetection,
             self.getDetectionStatus,
+            self.startCustomTraining,
+            self.customTrainer.listCustomGestureLabels,
         )
         window.mainloop()
 
@@ -82,6 +92,13 @@ class GestoApplication:
         """Stop detection and release the camera."""
         self.stopEvent.set()
         self.detectionLoop.stopDetection()
+
+    def startCustomTraining(self, gestureLabel: str) -> Path:
+        """Stop live detection and train one locally named custom gesture."""
+        self.stopDetection()
+        if self.detectionThread is not None:
+            self.detectionThread.join(timeout=1)
+        return self.trainingSession.train(gestureLabel)
 
     def runDetectionLoop(self) -> None:
         """Process camera frames until the user stops detection."""

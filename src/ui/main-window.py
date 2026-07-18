@@ -1,6 +1,8 @@
 """Gesto's desktop settings window and mapping controls."""
 
 from collections.abc import Callable
+import queue
+import threading
 from typing import Any
 
 import customtkinter as ctk
@@ -35,12 +37,17 @@ class MainWindow(ctk.CTk):
         startDetection: Callable[[], bool],
         stopDetection: Callable[[], None],
         getDetectionStatus: Callable[[], str],
+        startCustomTraining: Callable[[str], Any],
+        getCustomGestureLabels: Callable[[], list[str]],
     ) -> None:
         super().__init__()
         self.controller = controller
         self.startDetection = startDetection
         self.stopDetection = stopDetection
         self.getDetectionStatus = getDetectionStatus
+        self.startCustomTraining = startCustomTraining
+        self.getCustomGestureLabels = getCustomGestureLabels
+        self.trainingEvents: queue.Queue[tuple[str, Any]] = queue.Queue()
         self.isDetecting = False
 
         self.title("Gesto")
@@ -50,6 +57,7 @@ class MainWindow(ctk.CTk):
         self.createLayout()
         self.refreshMappings()
         self.after(250, self.refreshDetectionStatus)
+        self.after(250, self.refreshTrainingEvents)
 
     def createLayout(self) -> None:
         """Create the application header, mapping form, and status controls."""
@@ -107,7 +115,7 @@ class MainWindow(ctk.CTk):
 
         self.gestureMenu = ctk.CTkOptionMenu(
             formFrame,
-            values=list(BUILT_IN_GESTURES),
+            values=list(BUILT_IN_GESTURES) + self.getCustomGestureLabels(),
         )
         self.gestureMenu.grid(row=1, column=0, sticky="ew", padx=18, pady=8)
         self.actionMenu = ctk.CTkOptionMenu(
@@ -127,6 +135,13 @@ class MainWindow(ctk.CTk):
             text="Save Mapping",
             command=self.saveMapping,
         ).grid(row=4, column=0, sticky="ew", padx=18, pady=(8, 18))
+        ctk.CTkButton(
+            formFrame,
+            text="Train a custom gesture",
+            fg_color="transparent",
+            border_width=1,
+            command=self.openTrainingDialog,
+        ).grid(row=5, column=0, sticky="ew", padx=18, pady=(0, 18))
 
     def createMappingsList(self, parent: ctk.CTkFrame) -> None:
         """Create the scrollable area that shows saved mappings."""
@@ -169,6 +184,62 @@ class MainWindow(ctk.CTk):
         self.valueEntry.configure(state=entryState)
         if not isApplicationAction:
             self.valueEntry.delete(0, "end")
+
+    def openTrainingDialog(self) -> None:
+        """Open a small local-only naming dialog for a training session."""
+        dialog = ctk.CTkInputDialog(
+            text="Name this gesture (for example: my-open-palm)",
+            title="Train a custom gesture",
+        )
+        gestureLabel = dialog.get_input()
+        if not gestureLabel:
+            return
+
+        self.statusLabel.configure(
+            text="Capturing 40 samples…",
+            text_color="#60a5fa",
+        )
+        threading.Thread(
+            target=self.runCustomTraining,
+            args=(gestureLabel,),
+            daemon=True,
+        ).start()
+
+    def runCustomTraining(self, gestureLabel: str) -> None:
+        """Run camera training outside the UI event loop."""
+        try:
+            self.startCustomTraining(gestureLabel)
+            self.trainingEvents.put(("complete", gestureLabel))
+        except Exception as error:
+            self.trainingEvents.put(("error", str(error)))
+
+    def refreshTrainingEvents(self) -> None:
+        """Apply completed background-training results in the UI thread."""
+        try:
+            eventName, detail = self.trainingEvents.get_nowait()
+        except queue.Empty:
+            self.after(250, self.refreshTrainingEvents)
+            return
+
+        if eventName == "complete":
+            gestureLabels = (
+                list(BUILT_IN_GESTURES) + self.getCustomGestureLabels()
+            )
+            self.gestureMenu.configure(values=gestureLabels)
+            self.gestureMenu.set(detail)
+            self.statusLabel.configure(
+                text=(
+                    f"Trained {detail}. Choose an action and save its mapping."
+                ),
+                text_color="#4ade80",
+            )
+        else:
+            self.statusLabel.configure(
+                text=f"Training error: {detail}",
+                text_color="#f87171",
+            )
+
+        self.after(250, self.refreshTrainingEvents)
 
     def refreshMappings(self) -> None:
         """Render the latest local gesture-to-action mappings."""
