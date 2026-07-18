@@ -22,6 +22,7 @@ def trainCustomGesture(
     modelDirectory: Path = MODEL_DIRECTORY,
 ) -> Path:
     """Train and save one custom gesture from twenty or more local samples."""
+    gestureLabel = normalizeGestureLabel(gestureLabel)
     if len(landmarkSamples) < MIN_CUSTOM_GESTURE_SAMPLES:
         raise ValueError(
             "Custom gestures require at least "
@@ -68,7 +69,10 @@ def listCustomGestureLabels(
         return []
 
     modelPaths = modelDirectory.glob("*.joblib")
-    return sorted(modelPath.stem for modelPath in modelPaths)
+    labels = {
+        normalizeGestureLabel(modelPath.stem) for modelPath in modelPaths
+    }
+    return sorted(labels)
 
 
 def findSimilarGesture(
@@ -119,9 +123,21 @@ def detectCustomGesture(
 
         confidenceScore = 1.0 - (distance / threshold)
         if closestResult is None or confidenceScore > closestResult[1]:
-            closestResult = (str(savedModel["gestureLabel"]), confidenceScore)
+            gestureLabel = normalizeGestureLabel(
+                str(savedModel["gestureLabel"])
+            )
+            closestResult = (gestureLabel, confidenceScore)
 
     return closestResult
+
+
+def normalizeGestureLabel(gestureLabel: str) -> str:
+    """Return a stable local gesture name without surrounding whitespace."""
+    normalizedLabel = gestureLabel.strip()
+    if not normalizedLabel:
+        raise ValueError("Custom gesture names cannot be empty.")
+
+    return normalizedLabel
 
 
 def normalizeLandmarks(landmarks: list[Any]) -> list[float]:
