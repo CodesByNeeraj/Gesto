@@ -2,6 +2,7 @@
 
 import importlib.util
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 import numpy as np
@@ -28,3 +29,32 @@ def test_detectGestureReturnsNoneWhenNoHandIsDetected() -> None:
 
     assert result is None
     handProcessor.process.assert_called_once()
+
+
+def test_detectGestureReturnsOpenPalmWhenAllFingersAreExtended() -> None:
+    handProcessor = Mock()
+    landmarks = createOpenPalmLandmarks()
+    handProcessor.process.return_value.multi_hand_landmarks = [
+        SimpleNamespace(landmark=landmarks)
+    ]
+    detector = gestureDetector.GestureDetector(handProcessor)
+    frame = np.zeros((480, 640, 3), dtype=np.uint8)
+
+    result = detector.detectGesture(frame, threshold=0.80)
+
+    assert result == ("open-palm", 1.0)
+
+
+def createOpenPalmLandmarks() -> list[SimpleNamespace]:
+    landmarks = [SimpleNamespace(x=0.5, y=0.9) for _ in range(21)]
+    landmarks[3] = SimpleNamespace(x=0.3, y=0.6)
+    landmarks[4] = SimpleNamespace(x=0.1, y=0.5)
+    landmarks[6] = SimpleNamespace(x=0.4, y=0.5)
+    landmarks[8] = SimpleNamespace(x=0.4, y=0.2)
+    landmarks[10] = SimpleNamespace(x=0.5, y=0.5)
+    landmarks[12] = SimpleNamespace(x=0.5, y=0.2)
+    landmarks[14] = SimpleNamespace(x=0.6, y=0.5)
+    landmarks[16] = SimpleNamespace(x=0.6, y=0.2)
+    landmarks[18] = SimpleNamespace(x=0.7, y=0.55)
+    landmarks[20] = SimpleNamespace(x=0.7, y=0.3)
+    return landmarks
