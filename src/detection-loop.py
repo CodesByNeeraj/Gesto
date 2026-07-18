@@ -1,6 +1,7 @@
 """Run local gesture detection and execute configured actions."""
 
 import time
+import subprocess
 from collections.abc import Callable
 from typing import Any
 
@@ -26,6 +27,8 @@ class DetectionLoop:
         onDetection: Callable[[str, float], None] | None = None,
         onActionExecuted: Callable[[str, dict[str, Any]], None] | None = None,
         onObservation: Callable[[str], None] | None = None,
+        onActionFailed: Callable[[str, dict[str, Any], Exception], None]
+        | None = None,
     ) -> None:
         self.cameraHandler = cameraHandler
         self.gestureDetector = gestureDetector
@@ -36,6 +39,7 @@ class DetectionLoop:
         self.onDetection = onDetection
         self.onActionExecuted = onActionExecuted
         self.onObservation = onObservation
+        self.onActionFailed = onActionFailed
         self.lastTriggeredAt: dict[str, float] = {}
 
     def startDetection(self) -> bool:
@@ -71,7 +75,15 @@ class DetectionLoop:
         if action is None:
             return False
 
-        self.executeAction(action)
+        try:
+            self.executeAction(action)
+        except (OSError, subprocess.SubprocessError, ValueError) as error:
+            self.lastTriggeredAt[gestureLabel] = self.timeProvider()
+            self.gestureDetector.resetTracking()
+            if self.onActionFailed is not None:
+                self.onActionFailed(gestureLabel, action, error)
+            return False
+
         self.lastTriggeredAt[gestureLabel] = self.timeProvider()
         self.gestureDetector.resetTracking()
         if self.onActionExecuted is not None:

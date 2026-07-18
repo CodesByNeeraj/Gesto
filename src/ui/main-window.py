@@ -32,6 +32,7 @@ class MainWindow(ctk.CTk):
         getDetectionStatus: Callable[[], str],
         startCustomTraining: Callable[[str], Any],
         getCustomGestureLabels: Callable[[], list[str]],
+        getApplicationNames: Callable[[], list[str]],
     ) -> None:
         super().__init__()
         self.controller = controller
@@ -40,6 +41,7 @@ class MainWindow(ctk.CTk):
         self.getDetectionStatus = getDetectionStatus
         self.startCustomTraining = startCustomTraining
         self.getCustomGestureLabels = getCustomGestureLabels
+        self.getApplicationNames = getApplicationNames
         self.trainingEvents: queue.Queue[tuple[str, Any]] = queue.Queue()
         self.isDetecting = False
 
@@ -135,9 +137,10 @@ class MainWindow(ctk.CTk):
             command=self.updateActionValueField,
         )
         self.actionMenu.grid(row=2, column=0, sticky="ew", padx=18, pady=8)
-        self.valueEntry = ctk.CTkEntry(
+        self.valueEntry = ctk.CTkComboBox(
             formFrame,
-            placeholder_text="Application name (only for open-app)",
+            values=self.getApplicationNames(),
+            placeholder_text="Choose installed app or type a name",
         )
         self.valueEntry.grid(row=3, column=0, sticky="ew", padx=18, pady=8)
         self.updateActionValueField(self.actionMenu.get())

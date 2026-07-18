@@ -18,6 +18,9 @@ class GestoApplication:
         detectorModule = loadModule("gesture-detector.py", "gestureDetector")
         mapperModule = loadModule("action-mapper.py", "actionMapper")
         executorModule = loadModule("action-executor.py", "actionExecutor")
+        catalogModule = loadModule(
+            "application-catalog.py", "applicationCatalog"
+        )
         trainerModule = loadModule("custom-trainer.py", "customTrainer")
         trainingModule = loadModule("training-session.py", "trainingSession")
         loopModule = loadModule("detection-loop.py", "detectionLoop")
@@ -30,6 +33,7 @@ class GestoApplication:
         self.cameraHandler = cameraModule.CameraHandler()
         self.gestureDetector = detectorModule.GestureDetector()
         self.actionExecutor = executorModule.ActionExecutor()
+        self.applicationCatalog = catalogModule
         self.customTrainer = trainerModule
         self.trainingSession = trainingModule.TrainingSession(
             self.cameraHandler,
@@ -47,6 +51,7 @@ class GestoApplication:
             onDetection=self.recordDetection,
             onActionExecuted=self.recordActionExecution,
             onObservation=self.recordObservation,
+            onActionFailed=self.recordActionFailure,
         )
         self.mappingController = controllerModule.MainWindowController(
             self.config,
@@ -65,6 +70,7 @@ class GestoApplication:
             self.getDetectionStatus,
             self.startCustomTraining,
             self.customTrainer.listCustomGestureLabels,
+            self.applicationCatalog.listInstalledApplicationNames,
         )
         window.mainloop()
 
@@ -135,6 +141,21 @@ class GestoApplication:
             self.detectionStatus = (
                 f"Triggered {actionName} with {gestureLabel}"
             )
+
+    def recordActionFailure(
+        self,
+        gestureLabel: str,
+        action: dict[str, object],
+        error: Exception,
+    ) -> None:
+        """Show an action error while keeping live detection available."""
+        if action.get("action") == "open-app":
+            applicationName = action.get("value")
+            message = f"Couldn't open {applicationName}. Check the app name."
+        else:
+            message = f"Couldn't run action for {gestureLabel}: {error}"
+        with self.statusLock:
+            self.detectionStatus = message
 
     def getDetectionStatus(self) -> str:
         """Return a thread-safe snapshot of the latest detector status."""
