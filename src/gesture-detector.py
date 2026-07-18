@@ -10,6 +10,7 @@ DEFAULT_MAX_NUM_HANDS = 1
 DEFAULT_MIN_DETECTION_CONFIDENCE = 0.80
 DEFAULT_MIN_TRACKING_CONFIDENCE = 0.80
 FULL_CONFIDENCE = 1.0
+FIST_GESTURE = "fist"
 OPEN_PALM_GESTURE = "open-palm"
 WRIST_LANDMARK_INDEX = 0
 FINGER_LANDMARK_PAIRS = (
@@ -67,6 +68,9 @@ def classifyHandLandmarks(
 ) -> tuple[str, float] | None:
     """Classify supported gestures from one hand's landmark positions."""
     if not areAllFingersExtended(landmarks):
+        if areAllFingersFolded(landmarks):
+            return FIST_GESTURE, FULL_CONFIDENCE
+
         return None
 
     return OPEN_PALM_GESTURE, FULL_CONFIDENCE
@@ -80,6 +84,18 @@ def areAllFingersExtended(landmarks: list[Any]) -> bool:
     wrist = landmarks[WRIST_LANDMARK_INDEX]
     return all(
         isFingerExtended(landmarks, wrist, jointIndex, tipIndex)
+        for jointIndex, tipIndex in FINGER_LANDMARK_PAIRS
+    )
+
+
+def areAllFingersFolded(landmarks: list[Any]) -> bool:
+    """Return whether every fingertip is closer to the wrist than its joint."""
+    if len(landmarks) <= FINGER_LANDMARK_PAIRS[-1][1]:
+        return False
+
+    wrist = landmarks[WRIST_LANDMARK_INDEX]
+    return all(
+        not isFingerExtended(landmarks, wrist, jointIndex, tipIndex)
         for jointIndex, tipIndex in FINGER_LANDMARK_PAIRS
     )
 
