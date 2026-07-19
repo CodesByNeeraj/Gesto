@@ -47,8 +47,8 @@ class MainWindow(ctk.CTk):
         self.isDetecting = False
 
         self.title("Gesto")
-        self.geometry("860x560")
-        self.minsize(760, 500)
+        self.geometry("860x620")
+        self.minsize(760, 560)
         self.protocol("WM_DELETE_WINDOW", self.closeWindow)
         self.createLayout()
         self.refreshMappings()
