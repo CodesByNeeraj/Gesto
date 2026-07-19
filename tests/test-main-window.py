@@ -127,7 +127,14 @@ def test_mainWindowWrapsAndScrollsMappingRows() -> None:
 def test_mainWindowProvidesTrainingGuideTab() -> None:
     source = WINDOW_PATH.read_text()
 
-    assert 'self.tabView.add("Guide")' in source
+    assert 'text="Gestures"' in source
+    assert 'text="Guide"' in source
+    assert "command=self.showGestures" in source
+    assert "command=self.showGuide" in source
+    assert "CTkTabview" not in source
     assert "40 valid snapshots" in source
     assert "replaces the old model" in source
     assert "small, realistic variations" in source
+    assert "Your gestures, your rules." in source
+    assert "100% Privacy" in source
+    assert "Gesto neither collects, nor uploads" in source
