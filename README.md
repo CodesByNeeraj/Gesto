@@ -3,6 +3,13 @@
 Your gestures, your rules. Gesto is a local macOS app for mapping hand gestures
 you train yourself to useful computer actions.
 
+## Download the app
+
+If you want to use Gesto rather than build it from source, go to the
+[Releases page](https://github.com/CodesByNeeraj/Gesto/releases), download the
+latest `Gesto` zip for your Mac, unzip it, and move `Gesto.app` to
+Applications. The current prebuilt release supports Apple Silicon Macs.
+
 ## Setup on macOS
 
 Gesto requires **Python 3.12** to run from source or build the app. It is not
