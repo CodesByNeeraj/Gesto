@@ -108,12 +108,17 @@ def test_mainWindowProvidesRoomForTrainingGuidance() -> None:
 def test_mainWindowWrapsAndScrollsMappingRows() -> None:
     source = WINDOW_PATH.read_text()
 
-    assert "MAPPING_TEXT_WRAP_LENGTH = 250" in source
-    assert "MAPPING_LABEL_HEIGHT = 64" in source
+    assert "MAPPING_TEXT_WRAP_LENGTH = 200" in source
     assert "wraplength=MAPPING_TEXT_WRAP_LENGTH" in source
-    assert "height=MAPPING_LABEL_HEIGHT" in source
+    assert "width=MAPPING_TEXT_WRAP_LENGTH" in source
+    assert "height=0" in source
     assert "self.bindMappingScroll(rowFrame)" in source
     assert (
         "self.bindMappingScroll(self.mappingsFrame._parent_canvas)"
+        in source
+    )
+    assert "self.bindMappingScroll(self.mappingsFrame._parent_frame)" in source
+    assert (
+        "self.bind_all(\"<MouseWheel>\", self.handleMappingScroll, add=\"+\")"
         in source
     )
