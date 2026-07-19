@@ -64,16 +64,15 @@ before relying on its actions:
 
 ## Who it is for
 
-Gesto is for people who repeat small computer actions all day: developers,
-students, creators, and anyone who wants a personalised shortcut layer without
-memorising more key combinations.
+For anyone who wants a personalised shortcut layer without memorising more key
+combinations.
 
 ## What it solves
 
-Opening an app, pausing media, switching tabs, or taking a screenshot is quick
-once. Repeating those interruptions breaks focus. Gesto lets you define a
-gesture that feels natural to you, map it to one action, and trigger it from
-your laptop camera.
+Opening an app, pausing/playing media, switching tabs, or taking a screenshot
+is quick once. Repeating those interruptions breaks focus. Gesto lets you
+define a gesture that feels natural to you, map it to one action, and trigger
+it from your laptop camera.
 
 ## Features
 
