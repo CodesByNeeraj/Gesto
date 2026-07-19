@@ -72,7 +72,7 @@ class MainWindow(ctk.CTk):
         ).grid(row=0, column=0, sticky="w", padx=28, pady=(20, 0))
         ctk.CTkLabel(
             headerFrame,
-            text="Control your Mac with gestures.",
+            text="Your gestures, your rules.",
             text_color="gray70",
         ).grid(row=1, column=0, sticky="w", padx=28, pady=(2, 20))
         self.gesturesButton = ctk.CTkButton(
@@ -203,11 +203,12 @@ class MainWindow(ctk.CTk):
         self.addGuideSection(
             guideFrame,
             8,
-            "Your privacy",
+            "100% Privacy",
             (
-                "Camera frames, landmarks, and trained models stay "
-                "on this Mac. "
-                "Gesto does not upload them."
+                "Camera frames, landmarks, and trained models stay on your "
+                "Mac. Gesto neither collects, nor uploads any of these into "
+                "any backend servers. All of your data stays locally on your "
+                "Mac."
             ),
         )
 
