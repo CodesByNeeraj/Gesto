@@ -19,11 +19,7 @@ DEFAULT_SCREENSHOT_DIRECTORY = Path.home() / "Desktop"
 SWIFT_EXECUTABLE = "/usr/bin/swift"
 MEDIA_CONTROL_SCRIPT_PATH = Path(__file__).with_name("media-control.swift")
 TAB_CONTROL_SCRIPT_PATH = Path(__file__).with_name("tab-control.swift")
-LOCK_SCREEN_COMMAND = [
-    "/System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/"
-    "CGSession",
-    "-suspend",
-]
+LOCK_SCREEN_SCRIPT_PATH = Path(__file__).with_name("lock-screen.swift")
 
 
 class ActionExecutor:
@@ -99,5 +95,11 @@ class ActionExecutor:
         self.commandRunner(command, check=True)
 
     def lockScreen(self) -> None:
-        """Lock the current macOS session without invoking a shell."""
-        self.commandRunner(LOCK_SCREEN_COMMAND, check=True)
+        """Post macOS's native Control-Command-Q lock shortcut."""
+        self.commandRunner(
+            [
+                SWIFT_EXECUTABLE,
+                str(LOCK_SCREEN_SCRIPT_PATH),
+            ],
+            check=True,
+        )
