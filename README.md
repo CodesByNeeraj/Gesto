@@ -5,9 +5,23 @@ you train yourself to useful computer actions.
 
 ## Setup on macOS
 
-Gesto is built and tested on macOS with Python 3.12. Its media, tab-navigation,
-and lock-screen actions use Apple's `swift` command. This one-time command
-installs Swift as part of Xcode Command Line Tools:
+Gesto requires **Python 3.12** to run from source or build the app. It is not
+tested with older or newer Python versions. Check whether it is available:
+
+```bash
+python3.12 --version
+```
+
+If the command is unavailable, install Python 3.12 from
+[python.org](https://www.python.org/downloads/) or with Homebrew:
+
+```bash
+brew install python@3.12
+```
+
+Gesto's media, tab-navigation, and lock-screen actions use Apple's `swift`
+command. This one-time command installs Swift as part of Xcode Command Line
+Tools:
 
 ```bash
 xcode-select --install
@@ -34,12 +48,19 @@ scripts/build-macos-app.sh
 open dist/Gesto.app
 ```
 
-On the first **Start Detection**, macOS asks for Camera access. Choose
-**Allow**. If you previously denied it, enable Gesto in **System Settings >
-Privacy & Security > Camera**. macOS may also request Accessibility access for
-media controls, browser-tab navigation, and locking the screen. Screenshot
-capture may require Screen Recording access. Enable the relevant setting if an
-action does not respond.
+### Set permissions before use
+
+Open **System Settings > Privacy & Security** and give Gesto these permissions
+before relying on its actions:
+
+- **Accessibility**: enable Gesto for media play or pause, browser tab
+  switching, and locking the screen. If macOS lists Swift separately, enable it
+  too.
+- **Screen Recording**: enable Gesto if you plan to use the take-screenshot
+  action.
+- **Camera**: launch Gesto and click **Start Detection** once. macOS will then
+  show the Camera prompt. Choose **Allow**. If you denied it, enable Gesto
+  under **Camera** in System Settings.
 
 ## Who it is for
 
