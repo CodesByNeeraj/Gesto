@@ -96,3 +96,18 @@ def test_mainWindowExplainsConflictingGestureMapping() -> None:
     source = WINDOW_PATH.read_text()
 
     assert "Remove the existing mapping first." in source
+
+
+def test_mainWindowProvidesRoomForTrainingGuidance() -> None:
+    source = WINDOW_PATH.read_text()
+
+    assert 'self.geometry("860x620")' in source
+    assert "self.minsize(760, 560)" in source
+
+
+def test_mainWindowWrapsAndScrollsMappingRows() -> None:
+    source = WINDOW_PATH.read_text()
+
+    assert "MAPPING_TEXT_WRAP_LENGTH = 250" in source
+    assert "wraplength=MAPPING_TEXT_WRAP_LENGTH" in source
+    assert "self.bindMappingScroll(rowFrame)" in source
