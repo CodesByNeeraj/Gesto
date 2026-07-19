@@ -20,6 +20,7 @@ SUPPORTED_ACTIONS = (
 )
 GESTURES_KEY = "gestures"
 OPEN_APPLICATION_ACTION = "open-app"
+MAPPING_TEXT_WRAP_LENGTH = 250
 
 
 class MainWindow(ctk.CTk):
@@ -380,19 +381,46 @@ class MainWindow(ctk.CTk):
         actionText = mapping["action"]
         if mapping["value"]:
             actionText = f"{actionText}: {mapping['value']}"
-        ctk.CTkLabel(
+        mappingLabel = ctk.CTkLabel(
             rowFrame,
             text=f"{mapping['id']}  →  {actionText}",
             anchor="w",
-        ).grid(row=0, column=0, sticky="ew", padx=12, pady=12)
-        ctk.CTkButton(
+            justify="left",
+            wraplength=MAPPING_TEXT_WRAP_LENGTH,
+        )
+        mappingLabel.grid(row=0, column=0, sticky="ew", padx=12, pady=12)
+        removeButton = ctk.CTkButton(
             rowFrame,
             text="Remove",
             width=72,
             fg_color="transparent",
             border_width=1,
             command=lambda label=mapping["id"]: self.removeMapping(label),
-        ).grid(row=0, column=1, padx=8, pady=8)
+        )
+        removeButton.grid(row=0, column=1, padx=8, pady=8)
+        self.bindMappingScroll(rowFrame)
+
+    def bindMappingScroll(self, widget: Any) -> None:
+        """Forward wheel input from mapping rows to their scroll container."""
+        widget.bind("<MouseWheel>", self.scrollMappings, add="+")
+        widget.bind("<Button-4>", self.scrollMappings, add="+")
+        widget.bind("<Button-5>", self.scrollMappings, add="+")
+        for child in widget.winfo_children():
+            self.bindMappingScroll(child)
+
+    def scrollMappings(self, event: Any) -> str:
+        """Scroll mappings from mapping-row mouse or trackpad input."""
+        if getattr(event, "num", None) == 4:
+            scrollAmount = -1
+        elif getattr(event, "num", None) == 5:
+            scrollAmount = 1
+        else:
+            scrollAmount = -event.delta
+        self.mappingsFrame._parent_canvas.yview_scroll(
+            scrollAmount,
+            "units",
+        )
+        return "break"
 
     def removeMapping(self, gestureLabel: str) -> None:
         """Delete a mapping selected from the rendered list."""
