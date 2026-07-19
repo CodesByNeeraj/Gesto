@@ -13,3 +13,4 @@ def test_macosBuildScriptCreatesBrandedGestoApplication() -> None:
     assert "--name Gesto" in script
     assert "--icon \"${PROJECT_DIRECTORY}/assets/icons/Gesto.icns\"" in script
     assert "--osx-bundle-identifier com.gesto.app" in script
+    assert "NSCameraUsageDescription" in script
