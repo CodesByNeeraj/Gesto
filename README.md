@@ -34,12 +34,19 @@ scripts/build-macos-app.sh
 open dist/Gesto.app
 ```
 
-On the first **Start Detection**, macOS asks for Camera access. Choose
-**Allow**. If you previously denied it, enable Gesto in **System Settings >
-Privacy & Security > Camera**. macOS may also request Accessibility access for
-media controls, browser-tab navigation, and locking the screen. Screenshot
-capture may require Screen Recording access. Enable the relevant setting if an
-action does not respond.
+### Set permissions before use
+
+Open **System Settings > Privacy & Security** and give Gesto these permissions
+before relying on its actions:
+
+- **Accessibility**: enable Gesto for media play or pause, browser tab
+  switching, and locking the screen. If macOS lists Swift separately, enable it
+  too.
+- **Screen Recording**: enable Gesto if you plan to use the take-screenshot
+  action.
+- **Camera**: launch Gesto and click **Start Detection** once. macOS will then
+  show the Camera prompt. Choose **Allow**. If you denied it, enable Gesto
+  under **Camera** in System Settings.
 
 ## Who it is for
 
