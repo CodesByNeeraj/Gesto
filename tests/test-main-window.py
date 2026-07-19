@@ -135,3 +135,6 @@ def test_mainWindowProvidesTrainingGuideTab() -> None:
     assert "40 valid snapshots" in source
     assert "replaces the old model" in source
     assert "small, realistic variations" in source
+    assert "Your gestures, your rules." in source
+    assert "100% Privacy" in source
+    assert "Gesto neither collects, nor uploads" in source
