@@ -86,10 +86,8 @@ remained human-led.
 
 ## Codex feedback
 
-Before submission, run `/feedback` in the main Codex project thread and replace
-the placeholder below with that Session ID. This is the project thread where
-the core functionality was built.
+The core functionality was built in the following Codex project thread:
 
 ```text
-Codex Session ID: <add /feedback Session ID here>
+Codex Session ID: 019f70e4-4789-7070-916b-cc7bc7e1fea3
 ```
