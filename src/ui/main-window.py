@@ -20,8 +20,7 @@ SUPPORTED_ACTIONS = (
 )
 GESTURES_KEY = "gestures"
 OPEN_APPLICATION_ACTION = "open-app"
-MAPPING_TEXT_WRAP_LENGTH = 250
-MAPPING_LABEL_HEIGHT = 64
+MAPPING_TEXT_WRAP_LENGTH = 200
 
 
 class MainWindow(ctk.CTk):
@@ -221,6 +220,8 @@ class MainWindow(ctk.CTk):
         )
         self.bindMappingScroll(self.mappingsFrame)
         self.bindMappingScroll(self.mappingsFrame._parent_canvas)
+        self.bindMappingScroll(self.mappingsFrame._parent_frame)
+        self.bind_all("<MouseWheel>", self.handleMappingScroll, add="+")
         listFrame.grid_rowconfigure(1, weight=1)
 
     def saveMapping(self) -> None:
@@ -389,7 +390,8 @@ class MainWindow(ctk.CTk):
             text=f"{mapping['id']}  →  {actionText}",
             anchor="w",
             justify="left",
-            height=MAPPING_LABEL_HEIGHT,
+            width=MAPPING_TEXT_WRAP_LENGTH,
+            height=0,
             wraplength=MAPPING_TEXT_WRAP_LENGTH,
         )
         mappingLabel.grid(row=0, column=0, sticky="ew", padx=12, pady=12)
@@ -425,6 +427,28 @@ class MainWindow(ctk.CTk):
             "units",
         )
         return "break"
+
+    def handleMappingScroll(self, event: Any) -> str | None:
+        """Route all wheel input over the mappings pane to its canvas."""
+        widgetAtPointer = self.winfo_containing(event.x_root, event.y_root)
+        if not self.isMappingWidget(widgetAtPointer):
+            return None
+
+        self.scrollMappings(event)
+        return "break"
+
+    def isMappingWidget(self, widget: Any | None) -> bool:
+        """Return whether a widget belongs to the mappings scroll region."""
+        mappingWidgets = (
+            self.mappingsFrame,
+            self.mappingsFrame._parent_canvas,
+            self.mappingsFrame._parent_frame,
+        )
+        while widget is not None:
+            if widget in mappingWidgets:
+                return True
+            widget = widget.master
+        return False
 
     def removeMapping(self, gestureLabel: str) -> None:
         """Delete a mapping selected from the rendered list."""
