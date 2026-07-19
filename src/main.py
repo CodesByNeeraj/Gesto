@@ -129,9 +129,7 @@ class GestoApplication:
     ) -> None:
         """Store the latest gesture for the settings-window status area."""
         with self.statusLock:
-            self.detectionStatus = (
-                f"Detected {gestureLabel} at {confidenceScore:.0%} confidence"
-            )
+            self.detectionStatus = f"Detected {gestureLabel}"
 
     def recordObservation(self, observation: str) -> None:
         """Show the current camera/classifier state when no action is ready."""

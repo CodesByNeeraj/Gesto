@@ -1,6 +1,7 @@
 """Tests for Gesto application lifecycle management."""
 
 import importlib.util
+import threading
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -38,3 +39,14 @@ def test_stopDetectionWaitsForWorkerBeforeReleasingCamera() -> None:
 
     application.stopEvent.set.assert_called_once_with()
     assert callOrder == ["joined", "camera-released"]
+
+
+def test_recordDetectionShowsGestureWithoutConfidence() -> None:
+    application = gestoMain.GestoApplication.__new__(
+        gestoMain.GestoApplication
+    )
+    application.statusLock = threading.Lock()
+
+    application.recordDetection("open-palm", 0.92)
+
+    assert application.detectionStatus == "Detected open-palm"
