@@ -103,3 +103,11 @@ def test_mainWindowProvidesRoomForTrainingGuidance() -> None:
 
     assert 'self.geometry("860x620")' in source
     assert "self.minsize(760, 560)" in source
+
+
+def test_mainWindowWrapsAndScrollsMappingRows() -> None:
+    source = WINDOW_PATH.read_text()
+
+    assert "MAPPING_TEXT_WRAP_LENGTH = 250" in source
+    assert "wraplength=MAPPING_TEXT_WRAP_LENGTH" in source
+    assert "self.bindMappingScroll(rowFrame)" in source
