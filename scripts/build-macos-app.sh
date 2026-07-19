@@ -25,3 +25,4 @@ BUNDLE_PATH="${PROJECT_DIRECTORY}/dist/Gesto.app"
 /usr/libexec/PlistBuddy -c \
   "Add :NSCameraUsageDescription string Gesto uses your camera to recognize gestures locally on your Mac." \
   "${BUNDLE_PATH}/Contents/Info.plist"
+codesign --force --deep --sign - "${BUNDLE_PATH}"
