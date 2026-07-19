@@ -6,18 +6,21 @@ you train yourself to useful computer actions.
 ## Setup on macOS
 
 Gesto is built and tested on macOS with Python 3.12. Its media, tab-navigation,
-and lock-screen actions use Apple's `swift` command. Install Xcode Command Line
-Tools once before building Gesto:
+and lock-screen actions use Apple's `swift` command. This one-time command
+installs Swift as part of Xcode Command Line Tools:
 
 ```bash
 xcode-select --install
 ```
 
-Follow the macOS installer prompt, then verify that Swift is available:
+Follow the macOS installer prompt until it completes. Then run:
 
 ```bash
 /usr/bin/swift --version
 ```
+
+If it prints a Swift version, continue. If it does not, the Apple installer has
+not finished or needs to be run again.
 
 Then build the app bundle:
 
