@@ -96,8 +96,14 @@ class GestoApplication:
         return True
 
     def stopDetection(self) -> None:
-        """Stop detection and release the camera."""
+        """Stop the worker before releasing the camera it is using."""
         self.stopEvent.set()
+        if (
+            self.detectionThread is not None
+            and self.detectionThread.is_alive()
+            and self.detectionThread is not threading.current_thread()
+        ):
+            self.detectionThread.join()
         self.detectionLoop.stopDetection()
 
     def startCustomTraining(self, gestureLabel: str) -> Path:
