@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title description">
+  <title id="title">Gesto architecture</title>
+  <desc id="description">A local macOS gesture-control pipeline from camera input through recognition, mapping, and actions.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+    </marker>
+    <style>
+      .title { font: 700 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475569; }
+      .section { font: 700 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #64748b; letter-spacing: 1.2px; }
+      .box-title { font: 700 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .box-text { font: 400 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475569; }
+      .small { font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1d4ed8; }
+      .arrow { stroke: #2563eb; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .storage-arrow { stroke: #7c3aed; stroke-width: 2.5; fill: none; stroke-dasharray: 7 6; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1200" height="720" fill="#f8fafc"/>
+  <rect x="24" y="22" width="1152" height="676" rx="28" fill="#ffffff" stroke="#e2e8f0"/>
+
+  <text x="66" y="78" class="title">Gesto architecture</text>
+  <text x="66" y="106" class="subtitle">Gesture recognition and actions run locally on the Mac.</text>
+
+  <text x="82" y="164" class="section">INPUT</text>
+  <text x="352" y="164" class="section">GESTO</text>
+  <text x="900" y="164" class="section">MACOS</text>
+
+  <rect x="64" y="190" width="208" height="130" rx="18" fill="#eff6ff" stroke="#93c5fd" stroke-width="2"/>
+  <text x="88" y="232" class="box-title">Laptop camera</text>
+  <text x="88" y="260" class="box-text">Frames are available only</text>
+  <text x="88" y="282" class="box-text">while detection is running.</text>
+
+  <rect x="338" y="190" width="220" height="130" rx="18" fill="#eff6ff" stroke="#93c5fd" stroke-width="2"/>
+  <text x="362" y="232" class="box-title">Camera handler</text>
+  <text x="362" y="260" class="box-text">OpenCV captures and releases</text>
+  <text x="362" y="282" class="box-text">one camera stream safely.</text>
+
+  <rect x="624" y="190" width="220" height="130" rx="18" fill="#eff6ff" stroke="#93c5fd" stroke-width="2"/>
+  <text x="648" y="232" class="box-title">Gesture detector</text>
+  <text x="648" y="260" class="box-text">MediaPipe extracts 21 hand</text>
+  <text x="648" y="282" class="box-text">landmarks from each frame.</text>
+
+  <rect x="910" y="190" width="208" height="130" rx="18" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="2"/>
+  <text x="934" y="232" class="box-title">Custom classifier</text>
+  <text x="934" y="260" class="box-text">KNN matches a trained</text>
+  <text x="934" y="282" class="box-text">gesture and confidence.</text>
+
+  <path d="M272 255 H338" class="arrow"/>
+  <path d="M558 255 H624" class="arrow"/>
+  <path d="M844 255 H910" class="arrow"/>
+
+  <rect x="338" y="412" width="220" height="134" rx="18" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="362" y="454" class="box-title">Action mapper</text>
+  <text x="362" y="482" class="box-text">Checks confidence, cooldown,</text>
+  <text x="362" y="504" class="box-text">and the saved gesture mapping.</text>
+
+  <rect x="624" y="412" width="220" height="134" rx="18" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="648" y="454" class="box-title">Action executor</text>
+  <text x="648" y="482" class="box-text">Runs the mapped local</text>
+  <text x="648" y="504" class="box-text">macOS action.</text>
+
+  <rect x="910" y="390" width="208" height="178" rx="18" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="2"/>
+  <text x="934" y="432" class="box-title">macOS actions</text>
+  <text x="934" y="462" class="box-text">Open app</text>
+  <text x="934" y="486" class="box-text">Play or pause media</text>
+  <text x="934" y="510" class="box-text">Switch browser tabs</text>
+  <text x="934" y="534" class="box-text">Screenshot or lock screen</text>
+
+  <path d="M1014 320 V362 H448 V412" class="arrow"/>
+  <path d="M558 479 H624" class="arrow"/>
+  <path d="M844 479 H910" class="arrow"/>
+
+  <rect x="64" y="412" width="208" height="134" rx="18" fill="#fdf4ff" stroke="#f0abfc" stroke-width="2"/>
+  <text x="88" y="454" class="box-title">Local storage</text>
+  <text x="88" y="482" class="box-text">Gesture mappings</text>
+  <text x="88" y="504" class="box-text">Trained gesture models</text>
+  <text x="88" y="526" class="small">No cloud service</text>
+
+  <path d="M272 479 H338" class="storage-arrow"/>
+  <path d="M272 442 C490 360 780 350 1014 320" class="storage-arrow"/>
+
+  <rect x="64" y="602" width="1054" height="56" rx="14" fill="#eff6ff"/>
+  <circle cx="96" cy="630" r="8" fill="#2563eb"/>
+  <text x="116" y="636" class="box-text">Privacy boundary: camera frames, landmarks, mappings, and models remain on this device.</text>
+</svg>
