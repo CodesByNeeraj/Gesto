@@ -75,44 +75,73 @@ class MainWindow(ctk.CTk):
             text="Control your Mac with gestures.",
             text_color="gray70",
         ).grid(row=1, column=0, sticky="w", padx=28, pady=(2, 20))
+        self.gesturesButton = ctk.CTkButton(
+            headerFrame,
+            text="Gestures",
+            width=90,
+            command=self.showGestures,
+        )
+        self.gesturesButton.grid(
+            row=0,
+            column=1,
+            rowspan=2,
+            padx=(0, 8),
+            pady=20,
+        )
+        self.guideButton = ctk.CTkButton(
+            headerFrame,
+            text="Guide",
+            width=76,
+            fg_color="transparent",
+            border_width=1,
+            command=self.showGuide,
+        )
+        self.guideButton.grid(
+            row=0,
+            column=2,
+            rowspan=2,
+            padx=(0, 28),
+            pady=20,
+        )
 
-        self.tabView = ctk.CTkTabview(self, corner_radius=0)
-        self.tabView.grid(row=1, column=0, sticky="nsew", padx=0, pady=0)
-        controlsTab = self.tabView.add("Controls")
-        guideTab = self.tabView.add("Guide")
-        controlsTab.grid_columnconfigure(0, weight=1)
-        controlsTab.grid_rowconfigure(0, weight=1)
-
-        contentFrame = ctk.CTkFrame(controlsTab, fg_color="transparent")
-        contentFrame.grid(row=0, column=0, sticky="nsew", padx=24, pady=24)
-        contentFrame.grid_columnconfigure((0, 1), weight=1)
-        contentFrame.grid_rowconfigure(0, weight=1)
-
-        self.createMappingForm(contentFrame)
-        self.createMappingsList(contentFrame)
-
-        footerFrame = ctk.CTkFrame(controlsTab, corner_radius=12)
-        footerFrame.grid(
+        self.contentFrame = ctk.CTkFrame(self, fg_color="transparent")
+        self.contentFrame.grid(
             row=1,
+            column=0,
+            sticky="nsew",
+            padx=24,
+            pady=24,
+        )
+        self.contentFrame.grid_columnconfigure((0, 1), weight=1)
+        self.contentFrame.grid_rowconfigure(0, weight=1)
+
+        self.createMappingForm(self.contentFrame)
+        self.createMappingsList(self.contentFrame)
+
+        self.footerFrame = ctk.CTkFrame(self, corner_radius=12)
+        self.footerFrame.grid(
+            row=2,
             column=0,
             sticky="ew",
             padx=24,
             pady=(0, 24),
         )
-        footerFrame.grid_columnconfigure(0, weight=1)
+        self.footerFrame.grid_columnconfigure(0, weight=1)
         self.statusLabel = ctk.CTkLabel(
-            footerFrame,
+            self.footerFrame,
             text="Detection is stopped",
             text_color="gray70",
         )
         self.statusLabel.grid(row=0, column=0, sticky="w", padx=18, pady=14)
         self.toggleButton = ctk.CTkButton(
-            footerFrame,
+            self.footerFrame,
             text="Start Detection",
             command=self.toggleDetection,
         )
         self.toggleButton.grid(row=0, column=1, padx=14, pady=12)
-        self.createGuideTab(guideTab)
+        self.guideFrame = ctk.CTkFrame(self, fg_color="transparent")
+        self.createGuideTab(self.guideFrame)
+        self.showGestures()
 
     def createGuideTab(self, parent: ctk.CTkFrame) -> None:
         """Create clear local training and mapping guidance for users."""
@@ -202,6 +231,22 @@ class MainWindow(ctk.CTk):
             justify="left",
             wraplength=GUIDE_TEXT_WRAP_LENGTH,
         ).grid(row=row + 1, column=0, sticky="ew", padx=18, pady=(0, 10))
+
+    def showGuide(self) -> None:
+        """Show the in-app guide without altering the gestures layout."""
+        self.contentFrame.grid_remove()
+        self.footerFrame.grid_remove()
+        self.guideFrame.grid(row=1, column=0, sticky="nsew")
+        self.gesturesButton.configure(fg_color="transparent", border_width=1)
+        self.guideButton.configure(fg_color="#1f6aa5", border_width=0)
+
+    def showGestures(self) -> None:
+        """Restore the original gesture mapping and detection controls."""
+        self.guideFrame.grid_remove()
+        self.contentFrame.grid()
+        self.footerFrame.grid()
+        self.gesturesButton.configure(fg_color="#1f6aa5", border_width=0)
+        self.guideButton.configure(fg_color="transparent", border_width=1)
 
     def createMappingForm(self, parent: ctk.CTkFrame) -> None:
         """Create controls for adding or updating a mapping."""
