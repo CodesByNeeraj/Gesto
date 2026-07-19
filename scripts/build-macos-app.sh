@@ -20,3 +20,8 @@ python -m PyInstaller \
   --hidden-import numpy \
   --hidden-import sklearn \
   "${PROJECT_DIRECTORY}/src/main.py"
+
+BUNDLE_PATH="${PROJECT_DIRECTORY}/dist/Gesto.app"
+/usr/libexec/PlistBuddy -c \
+  "Add :NSCameraUsageDescription string Gesto uses your camera to recognize gestures locally on your Mac." \
+  "${BUNDLE_PATH}/Contents/Info.plist"
