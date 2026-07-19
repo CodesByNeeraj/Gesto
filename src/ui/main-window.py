@@ -21,6 +21,7 @@ SUPPORTED_ACTIONS = (
 GESTURES_KEY = "gestures"
 OPEN_APPLICATION_ACTION = "open-app"
 MAPPING_TEXT_WRAP_LENGTH = 200
+GUIDE_TEXT_WRAP_LENGTH = 680
 
 
 class MainWindow(ctk.CTk):
@@ -75,16 +76,29 @@ class MainWindow(ctk.CTk):
             text_color="gray70",
         ).grid(row=1, column=0, sticky="w", padx=28, pady=(2, 20))
 
-        contentFrame = ctk.CTkFrame(self, fg_color="transparent")
-        contentFrame.grid(row=1, column=0, sticky="nsew", padx=24, pady=24)
+        self.tabView = ctk.CTkTabview(self, corner_radius=0)
+        self.tabView.grid(row=1, column=0, sticky="nsew", padx=0, pady=0)
+        controlsTab = self.tabView.add("Controls")
+        guideTab = self.tabView.add("Guide")
+        controlsTab.grid_columnconfigure(0, weight=1)
+        controlsTab.grid_rowconfigure(0, weight=1)
+
+        contentFrame = ctk.CTkFrame(controlsTab, fg_color="transparent")
+        contentFrame.grid(row=0, column=0, sticky="nsew", padx=24, pady=24)
         contentFrame.grid_columnconfigure((0, 1), weight=1)
         contentFrame.grid_rowconfigure(0, weight=1)
 
         self.createMappingForm(contentFrame)
         self.createMappingsList(contentFrame)
 
-        footerFrame = ctk.CTkFrame(self, corner_radius=12)
-        footerFrame.grid(row=2, column=0, sticky="ew", padx=24, pady=(0, 24))
+        footerFrame = ctk.CTkFrame(controlsTab, corner_radius=12)
+        footerFrame.grid(
+            row=1,
+            column=0,
+            sticky="ew",
+            padx=24,
+            pady=(0, 24),
+        )
         footerFrame.grid_columnconfigure(0, weight=1)
         self.statusLabel = ctk.CTkLabel(
             footerFrame,
@@ -98,6 +112,96 @@ class MainWindow(ctk.CTk):
             command=self.toggleDetection,
         )
         self.toggleButton.grid(row=0, column=1, padx=14, pady=12)
+        self.createGuideTab(guideTab)
+
+    def createGuideTab(self, parent: ctk.CTkFrame) -> None:
+        """Create clear local training and mapping guidance for users."""
+        parent.grid_columnconfigure(0, weight=1)
+        parent.grid_rowconfigure(0, weight=1)
+        guideFrame = ctk.CTkScrollableFrame(parent, fg_color="transparent")
+        guideFrame.grid(row=0, column=0, sticky="nsew", padx=24, pady=16)
+        guideFrame.grid_columnconfigure(0, weight=1)
+
+        self.addGuideSection(
+            guideFrame,
+            0,
+            "Save a mapping",
+            (
+                "1. Select a trained gesture.\n"
+                "2. Select the action it should perform.\n"
+                "3. For open-app, select an installed app or type its name.\n"
+                "4. Select Save Mapping.\n\n"
+                "Each gesture can have one action. To change it, remove the "
+                "existing mapping first."
+            ),
+        )
+        self.addGuideSection(
+            guideFrame,
+            2,
+            "Train a custom gesture",
+            (
+                "Select Train a custom gesture, name the pose, then hold it "
+                "in the camera view. Gesto records 40 valid snapshots of your "
+                "21 hand landmarks. A snapshot counts only when a hand is "
+                "visible, so this normally takes about four seconds."
+            ),
+        )
+        self.addGuideSection(
+            guideFrame,
+            4,
+            "Make recognition reliable",
+            (
+                "Keep the same finger pose throughout training. During the 40 "
+                "snapshots, make small, realistic variations: move your hand "
+                "slightly closer or farther away, shift it a little, "
+                "and gently "
+                "tilt it. Do not switch to a different pose or make extreme "
+                "movements; those samples make gestures easier to confuse."
+            ),
+        )
+        self.addGuideSection(
+            guideFrame,
+            6,
+            "Retrain a gesture",
+            (
+                "Select a saved gesture and choose Retrain. Capture the same "
+                "pose with the small, realistic variations you use "
+                "day to day. Retraining replaces the old model; it "
+                "does not add another set "
+                "of samples to it. Its existing mapping stays in place."
+            ),
+        )
+        self.addGuideSection(
+            guideFrame,
+            8,
+            "Your privacy",
+            (
+                "Camera frames, landmarks, and trained models stay "
+                "on this Mac. "
+                "Gesto does not upload them."
+            ),
+        )
+
+    def addGuideSection(
+        self,
+        parent: ctk.CTkScrollableFrame,
+        row: int,
+        heading: str,
+        body: str,
+    ) -> None:
+        """Add one readable heading and explanation to the Guide tab."""
+        ctk.CTkLabel(
+            parent,
+            text=heading,
+            font=ctk.CTkFont(size=18, weight="bold"),
+        ).grid(row=row, column=0, sticky="w", padx=18, pady=(12, 2))
+        ctk.CTkLabel(
+            parent,
+            text=body,
+            anchor="w",
+            justify="left",
+            wraplength=GUIDE_TEXT_WRAP_LENGTH,
+        ).grid(row=row + 1, column=0, sticky="ew", padx=18, pady=(0, 10))
 
     def createMappingForm(self, parent: ctk.CTkFrame) -> None:
         """Create controls for adding or updating a mapping."""
