@@ -96,3 +96,10 @@ def test_mainWindowExplainsConflictingGestureMapping() -> None:
     source = WINDOW_PATH.read_text()
 
     assert "Remove the existing mapping first." in source
+
+
+def test_mainWindowProvidesRoomForTrainingGuidance() -> None:
+    source = WINDOW_PATH.read_text()
+
+    assert 'self.geometry("860x620")' in source
+    assert "self.minsize(760, 560)" in source
