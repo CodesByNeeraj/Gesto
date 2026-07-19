@@ -29,7 +29,7 @@ git clone https://github.com/CodesByNeeraj/Gesto.git
 cd Gesto
 python3.12 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements.txt -r requirements-build.txt
+python -m pip install -r requirements.txt
 scripts/build-macos-app.sh
 open dist/Gesto.app
 ```
