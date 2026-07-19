@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+PROJECT_DIRECTORY="$(cd "$(dirname "$0")/.." && pwd)"
+
+python -m PyInstaller \
+  --noconfirm \
+  --clean \
+  --windowed \
+  --name Gesto \
+  --icon "${PROJECT_DIRECTORY}/assets/icons/Gesto.icns" \
+  --osx-bundle-identifier com.gesto.app \
+  --add-data "${PROJECT_DIRECTORY}/assets:assets" \
+  --add-data "${PROJECT_DIRECTORY}/src:src" \
+  --collect-all customtkinter \
+  --collect-all mediapipe \
+  --hidden-import cv2 \
+  --hidden-import joblib \
+  --hidden-import numpy \
+  --hidden-import sklearn \
+  "${PROJECT_DIRECTORY}/src/main.py"

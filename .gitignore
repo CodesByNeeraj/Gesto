@@ -3,4 +3,7 @@
 .venv-tk/
 .pytest_cache/
 __pycache__/
+build/
+dist/
+Gesto.spec
 *.py[cod]
