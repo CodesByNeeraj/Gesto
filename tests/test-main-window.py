@@ -122,3 +122,12 @@ def test_mainWindowWrapsAndScrollsMappingRows() -> None:
         "self.bind_all(\"<MouseWheel>\", self.handleMappingScroll, add=\"+\")"
         in source
     )
+
+
+def test_mainWindowProvidesTrainingGuideTab() -> None:
+    source = WINDOW_PATH.read_text()
+
+    assert 'self.tabView.add("Guide")' in source
+    assert "40 valid snapshots" in source
+    assert "replaces the old model" in source
+    assert "small, realistic variations" in source
