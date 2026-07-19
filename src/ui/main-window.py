@@ -21,6 +21,7 @@ SUPPORTED_ACTIONS = (
 GESTURES_KEY = "gestures"
 OPEN_APPLICATION_ACTION = "open-app"
 MAPPING_TEXT_WRAP_LENGTH = 250
+MAPPING_LABEL_HEIGHT = 64
 
 
 class MainWindow(ctk.CTk):
@@ -218,6 +219,8 @@ class MainWindow(ctk.CTk):
             padx=8,
             pady=(0, 12),
         )
+        self.bindMappingScroll(self.mappingsFrame)
+        self.bindMappingScroll(self.mappingsFrame._parent_canvas)
         listFrame.grid_rowconfigure(1, weight=1)
 
     def saveMapping(self) -> None:
@@ -386,6 +389,7 @@ class MainWindow(ctk.CTk):
             text=f"{mapping['id']}  →  {actionText}",
             anchor="w",
             justify="left",
+            height=MAPPING_LABEL_HEIGHT,
             wraplength=MAPPING_TEXT_WRAP_LENGTH,
         )
         mappingLabel.grid(row=0, column=0, sticky="ew", padx=12, pady=12)
