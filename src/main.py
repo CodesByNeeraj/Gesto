@@ -1,12 +1,20 @@
 """Launch the Gesto desktop application."""
 
 import importlib.util
+import sys
 import threading
 from pathlib import Path
 from types import ModuleType
 
 
-SOURCE_DIRECTORY = Path(__file__).parent
+def getSourceDirectory() -> Path:
+    """Return source modules from the repo or a packaged app bundle."""
+    if getattr(sys, "frozen", False):
+        return Path(sys._MEIPASS) / "src"
+    return Path(__file__).parent
+
+
+SOURCE_DIRECTORY = getSourceDirectory()
 
 
 class GestoApplication:

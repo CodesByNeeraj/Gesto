@@ -5,6 +5,7 @@ import threading
 from pathlib import Path
 from unittest.mock import Mock
 
+from pytest import MonkeyPatch
 
 PROJECT_ROOT = Path(__file__).parents[1]
 MODULE_PATH = PROJECT_ROOT / "src" / "main.py"
@@ -50,3 +51,21 @@ def test_recordDetectionShowsGestureWithoutConfidence() -> None:
     application.recordDetection("open-palm", 0.92)
 
     assert application.detectionStatus == "Detected open-palm"
+
+
+def test_getSourceDirectoryUsesBundledSourceWhenFrozen(
+    monkeypatch: MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(gestoMain.sys, "frozen", True, raising=False)
+    monkeypatch.setattr(
+        gestoMain.sys,
+        "_MEIPASS",
+        "/tmp/Gesto.app/Contents/Resources",
+        raising=False,
+    )
+
+    sourceDirectory = gestoMain.getSourceDirectory()
+
+    assert sourceDirectory == Path(
+        "/tmp/Gesto.app/Contents/Resources/src"
+    )
