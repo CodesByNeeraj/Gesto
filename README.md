@@ -5,9 +5,23 @@ you train yourself to useful computer actions.
 
 ## Setup on macOS
 
-Gesto is built and tested on macOS with Python 3.12. Its media, tab-navigation,
-and lock-screen actions use Apple's `swift` command. This one-time command
-installs Swift as part of Xcode Command Line Tools:
+Gesto requires **Python 3.12** to run from source or build the app. It is not
+tested with older or newer Python versions. Check whether it is available:
+
+```bash
+python3.12 --version
+```
+
+If the command is unavailable, install Python 3.12 from
+[python.org](https://www.python.org/downloads/) or with Homebrew:
+
+```bash
+brew install python@3.12
+```
+
+Gesto's media, tab-navigation, and lock-screen actions use Apple's `swift`
+command. This one-time command installs Swift as part of Xcode Command Line
+Tools:
 
 ```bash
 xcode-select --install
