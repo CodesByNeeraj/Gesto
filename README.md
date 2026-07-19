@@ -110,8 +110,8 @@ travel, health, and personal finance.
 
 ## Building with Codex
 
-Gesto was developed through an ongoing collaboration between the project owner
-and Codex, powered by GPT-5.6. The project owner set the product direction and
+Gesto was developed through an ongoing collaboration between the project owner (me!)
+and Codex, powered by GPT-5.6-terra. The project owner set the product direction and
 made the key calls on the gesture-first workflow, custom training, local-only
 privacy, supported actions, and UI behaviour. Codex accelerated delivery by
 turning those decisions into small, tested pull requests, investigating runtime
