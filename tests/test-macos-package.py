@@ -14,3 +14,4 @@ def test_macosBuildScriptCreatesBrandedGestoApplication() -> None:
     assert "--icon \"${PROJECT_DIRECTORY}/assets/icons/Gesto.icns\"" in script
     assert "--osx-bundle-identifier com.gesto.app" in script
     assert "NSCameraUsageDescription" in script
+    assert "codesign --force --deep --sign -" in script
