@@ -108,9 +108,16 @@ def test_executeActionLocksTheScreen() -> None:
 
     commandRunner.assert_called_once_with(
         [
-            "/System/Library/CoreServices/Menu Extras/User.menu/Contents/"
-            "Resources/CGSession",
-            "-suspend",
+            actionExecutor.SWIFT_EXECUTABLE,
+            str(actionExecutor.LOCK_SCREEN_SCRIPT_PATH),
         ],
         check=True,
     )
+
+
+def test_lockScreenUsesNativeMacShortcut() -> None:
+    script = actionExecutor.LOCK_SCREEN_SCRIPT_PATH.read_text()
+
+    assert "let lockScreenKey: CGKeyCode = 12" in script
+    assert ".maskControl" in script
+    assert ".maskCommand" in script
