@@ -21,6 +21,7 @@ SUPPORTED_ACTIONS = (
 GESTURES_KEY = "gestures"
 OPEN_APPLICATION_ACTION = "open-app"
 MAPPING_TEXT_WRAP_LENGTH = 200
+TRAINING_HINT_WRAP_LENGTH = 360
 GUIDE_TEXT_WRAP_LENGTH = 680
 
 
@@ -47,6 +48,7 @@ class MainWindow(ctk.CTk):
         self.getApplicationNames = getApplicationNames
         self.trainingEvents: queue.Queue[tuple[str, Any]] = queue.Queue()
         self.isDetecting = False
+        self.isTraining = False
 
         self.title("Gesto")
         self.geometry("860x620")
@@ -337,7 +339,7 @@ class MainWindow(ctk.CTk):
             formFrame,
             text="",
             text_color="gray70",
-            wraplength=280,
+            wraplength=TRAINING_HINT_WRAP_LENGTH,
         )
         self.trainingHintLabel.grid(
             row=7,
@@ -430,6 +432,7 @@ class MainWindow(ctk.CTk):
         if not gestureLabel:
             return
 
+        self.setTrainingState(True)
         self.statusLabel.configure(
             text="Capturing 40 samples…",
             text_color="#60a5fa",
@@ -451,6 +454,7 @@ class MainWindow(ctk.CTk):
             )
             return
 
+        self.setTrainingState(True)
         self.statusLabel.configure(
             text=f"Retraining {gestureLabel}: capturing 40 samples…",
             text_color="#60a5fa",
@@ -485,6 +489,7 @@ class MainWindow(ctk.CTk):
             self.after(250, self.refreshTrainingEvents)
             return
 
+        self.setTrainingState(False)
         if eventName in ("complete", "retrained"):
             gestureLabels = self.getGestureMenuValues()
             self.gestureMenu.configure(values=gestureLabels)
@@ -508,6 +513,20 @@ class MainWindow(ctk.CTk):
             )
 
         self.after(250, self.refreshTrainingEvents)
+
+    def setTrainingState(self, isTraining: bool) -> None:
+        """Prevent concurrent camera work while training owns the camera."""
+        self.isTraining = isTraining
+        state = "disabled" if isTraining else "normal"
+        self.toggleButton.configure(state=state)
+        self.trainButton.configure(state=state)
+        self.retrainButton.configure(state=state)
+        if isTraining:
+            self.trainingHintLabel.configure(
+                text="Training is in progress. Detection is unavailable."
+            )
+        else:
+            self.trainingHintLabel.configure(text="")
 
     def refreshMappings(self) -> None:
         """Render the latest local gesture-to-action mappings."""
@@ -607,6 +626,9 @@ class MainWindow(ctk.CTk):
 
     def toggleDetection(self) -> None:
         """Start or stop the background detection loop."""
+        if self.isTraining:
+            return
+
         if self.isDetecting:
             self.stopDetection()
             self.isDetecting = False
