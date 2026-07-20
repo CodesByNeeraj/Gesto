@@ -21,6 +21,7 @@ SUPPORTED_ACTIONS = (
 GESTURES_KEY = "gestures"
 OPEN_APPLICATION_ACTION = "open-app"
 MAPPING_TEXT_WRAP_LENGTH = 200
+TRAINING_HINT_WRAP_LENGTH = 360
 GUIDE_TEXT_WRAP_LENGTH = 680
 
 
@@ -338,7 +339,7 @@ class MainWindow(ctk.CTk):
             formFrame,
             text="",
             text_color="gray70",
-            wraplength=280,
+            wraplength=TRAINING_HINT_WRAP_LENGTH,
         )
         self.trainingHintLabel.grid(
             row=7,
