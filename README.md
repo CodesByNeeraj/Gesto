@@ -15,6 +15,14 @@ show a warning that Apple cannot verify it. Dismiss the warning, then open
 **System Settings > Privacy & Security**, scroll to **Security**, click **Open
 Anyway** beside the Gesto message, and confirm **Open**.
 
+### Keep detection running
+
+After selecting **Start Detection**, leave Gesto open for gesture controls to
+work. You can minimise the window or leave it open while you continue working,
+but do not close the app. When you want to stop using gestures, select **Stop
+Detection** and close Gesto, or simply close the app; closing it stops
+detection.
+
 ## Setup on macOS
 
 Gesto requires **Python 3.12** to run from source or build the app. It is not
