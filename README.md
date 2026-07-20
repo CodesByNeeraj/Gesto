@@ -10,6 +10,11 @@ If you want to use Gesto rather than build it from source, go to the
 latest `Gesto` zip for your Mac, unzip it, and move `Gesto.app` to
 Applications. The current prebuilt release supports Apple Silicon Macs.
 
+The release is an unsigned beta. On the first attempt to open Gesto, macOS will
+show a warning that Apple cannot verify it. Dismiss the warning, then open
+**System Settings > Privacy & Security**, scroll to **Security**, click **Open
+Anyway** beside the Gesto message, and confirm **Open**.
+
 ## Setup on macOS
 
 Gesto requires **Python 3.12** to run from source or build the app. It is not
