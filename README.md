@@ -65,9 +65,11 @@ open dist/Gesto.app
 Open **System Settings > Privacy & Security** and give Gesto these permissions
 before relying on its actions:
 
-- **Accessibility**: enable Gesto for media play or pause, browser tab
-  switching, and locking the screen. If macOS lists Swift separately, enable it
-  too.
+- **Accessibility**: required for media play or pause, browser tab switching,
+  and locking the screen. Open **System Settings > Privacy & Security >
+  Accessibility**, click **+**, authenticate, select `Gesto.app` from
+  Applications, then turn on its toggle. If macOS lists Swift separately,
+  enable it too.
 - **Screen Recording**: enable Gesto if you plan to use the take-screenshot
   action.
 - **Camera**: launch Gesto and click **Start Detection** once. macOS will then
