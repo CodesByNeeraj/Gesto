@@ -10,6 +10,11 @@ If you want to use Gesto rather than build it from source, go to the
 latest `Gesto` zip for your Mac, unzip it, and move `Gesto.app` to
 Applications. The current prebuilt release supports Apple Silicon Macs.
 
+The release is an unsigned beta. On the first attempt to open Gesto, macOS will
+show a warning that Apple cannot verify it. Dismiss the warning, then open
+**System Settings > Privacy & Security**, scroll to **Security**, click **Open
+Anyway** beside the Gesto message, and confirm **Open**.
+
 ## Setup on macOS
 
 Gesto requires **Python 3.12** to run from source or build the app. It is not
@@ -60,9 +65,11 @@ open dist/Gesto.app
 Open **System Settings > Privacy & Security** and give Gesto these permissions
 before relying on its actions:
 
-- **Accessibility**: enable Gesto for media play or pause, browser tab
-  switching, and locking the screen. If macOS lists Swift separately, enable it
-  too.
+- **Accessibility**: required for media play or pause, browser tab switching,
+  and locking the screen. Open **System Settings > Privacy & Security >
+  Accessibility**, click **+**, authenticate, select `Gesto.app` from
+  Applications, then turn on its toggle. If macOS lists Swift separately,
+  enable it too.
 - **Screen Recording**: enable Gesto if you plan to use the take-screenshot
   action.
 - **Camera**: launch Gesto and click **Start Detection** once. macOS will then
