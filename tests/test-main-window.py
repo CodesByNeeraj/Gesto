@@ -81,6 +81,18 @@ def test_mainWindowProvidesRetrainControlForSelectedGesture() -> None:
     assert "self.retrainButton.configure(state=\"disabled\")" in source
 
 
+def test_mainWindowDisablesDetectionAndTrainingDuringSampleCapture() -> None:
+    source = WINDOW_PATH.read_text()
+
+    assert "self.isTraining = False" in source
+    assert "self.setTrainingState(True)" in source
+    assert "self.setTrainingState(False)" in source
+    assert 'state = "disabled" if isTraining else "normal"' in source
+    assert "self.toggleButton.configure(state=state)" in source
+    assert "self.trainButton.configure(state=state)" in source
+    assert "self.retrainButton.configure(state=state)" in source
+
+
 def test_mainWindowProvidesInstalledApplicationSuggestions() -> None:
     source = WINDOW_PATH.read_text()
 
