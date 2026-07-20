@@ -115,6 +115,8 @@ def test_mainWindowProvidesRoomForTrainingGuidance() -> None:
 
     assert 'self.geometry("860x620")' in source
     assert "self.minsize(760, 560)" in source
+    assert "TRAINING_HINT_WRAP_LENGTH = 360" in source
+    assert "wraplength=TRAINING_HINT_WRAP_LENGTH" in source
 
 
 def test_mainWindowWrapsAndScrollsMappingRows() -> None:
