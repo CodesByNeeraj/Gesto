@@ -396,6 +396,10 @@ class MainWindow(ctk.CTk):
 
         self.valueEntry.set("")
         self.refreshMappings()
+        self.statusLabel.configure(
+            text="Mapping Saved",
+            text_color="#4ade80",
+        )
         self.saveButton.configure(text="Saved Mapping", fg_color="#16a34a")
         self.after(2000, self.restoreSaveButton)
 
