@@ -98,6 +98,13 @@ def test_mainWindowExplainsConflictingGestureMapping() -> None:
     assert "Remove the existing mapping first." in source
 
 
+def test_mainWindowReportsSuccessfulMappingInStatusArea() -> None:
+    source = WINDOW_PATH.read_text()
+
+    assert 'text="Mapping Saved"' in source
+    assert 'text_color="#4ade80"' in source
+
+
 def test_mainWindowProvidesRoomForTrainingGuidance() -> None:
     source = WINDOW_PATH.read_text()
 
