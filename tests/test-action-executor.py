@@ -3,7 +3,7 @@
 import importlib.util
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 
 PROJECT_ROOT = Path(__file__).parents[1]
@@ -64,31 +64,28 @@ def test_executeActionMovesToNextBrowserTab() -> None:
     commandRunner = Mock()
     executor = actionExecutor.ActionExecutor(commandRunner)
 
-    executor.executeAction({"action": "switch-tab-next", "value": None})
+    with patch.object(
+        actionExecutor, "postBrowserTabShortcut"
+    ) as postShortcut:
+        executor.executeAction({"action": "switch-tab-next", "value": None})
 
-    commandRunner.assert_called_once_with(
-        [
-            actionExecutor.SWIFT_EXECUTABLE,
-            str(actionExecutor.TAB_CONTROL_SCRIPT_PATH),
-        ],
-        check=True,
-    )
+    postShortcut.assert_called_once_with(False)
+    commandRunner.assert_not_called()
 
 
 def test_executeActionMovesToPreviousBrowserTab() -> None:
     commandRunner = Mock()
     executor = actionExecutor.ActionExecutor(commandRunner)
 
-    executor.executeAction({"action": "switch-tab-previous", "value": None})
+    with patch.object(
+        actionExecutor, "postBrowserTabShortcut"
+    ) as postShortcut:
+        executor.executeAction(
+            {"action": "switch-tab-previous", "value": None}
+        )
 
-    commandRunner.assert_called_once_with(
-        [
-            actionExecutor.SWIFT_EXECUTABLE,
-            str(actionExecutor.TAB_CONTROL_SCRIPT_PATH),
-            "--previous",
-        ],
-        check=True,
-    )
+    postShortcut.assert_called_once_with(True)
+    commandRunner.assert_not_called()
 
 
 def test_tabControlUsesMacBrowserTabNavigationShortcut() -> None:

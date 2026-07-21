@@ -1,5 +1,7 @@
 """Execute mapped Gesto actions on macOS."""
 
+import ctypes
+import platform
 import subprocess
 from collections.abc import Callable
 from datetime import datetime
@@ -20,6 +22,46 @@ SWIFT_EXECUTABLE = "/usr/bin/swift"
 MEDIA_CONTROL_SCRIPT_PATH = Path(__file__).with_name("media-control.swift")
 TAB_CONTROL_SCRIPT_PATH = Path(__file__).with_name("tab-control.swift")
 LOCK_SCREEN_SCRIPT_PATH = Path(__file__).with_name("lock-screen.swift")
+RIGHT_ARROW_KEY = 124
+LEFT_ARROW_KEY = 123
+COMMAND_KEY = 55
+OPTION_KEY = 58
+COMMAND_FLAG = 1 << 20
+OPTION_FLAG = 1 << 19
+HID_EVENT_TAP = 0
+
+
+def postBrowserTabShortcut(isPreviousTab: bool) -> None:
+    """Post Chrome's Command-Option arrow shortcut from this process."""
+    if platform.system() != "Darwin":
+        raise OSError("Browser tab shortcuts require macOS.")
+
+    coreGraphics = ctypes.CDLL(
+        "/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics"
+    )
+    createEvent = coreGraphics.CGEventCreateKeyboardEvent
+    createEvent.argtypes = [ctypes.c_void_p, ctypes.c_uint16, ctypes.c_bool]
+    createEvent.restype = ctypes.c_void_p
+    setFlags = coreGraphics.CGEventSetFlags
+    setFlags.argtypes = [ctypes.c_void_p, ctypes.c_uint64]
+    postEvent = coreGraphics.CGEventPost
+    postEvent.argtypes = [ctypes.c_uint32, ctypes.c_void_p]
+
+    def postKey(keyCode: int, isDown: bool, flags: int = 0) -> None:
+        event = createEvent(None, keyCode, isDown)
+        if not event:
+            raise OSError("macOS could not create a keyboard event.")
+        setFlags(event, flags)
+        postEvent(HID_EVENT_TAP, event)
+
+    tabKey = LEFT_ARROW_KEY if isPreviousTab else RIGHT_ARROW_KEY
+    navigationFlags = COMMAND_FLAG | OPTION_FLAG
+    postKey(COMMAND_KEY, True)
+    postKey(OPTION_KEY, True)
+    postKey(tabKey, True, navigationFlags)
+    postKey(tabKey, False, navigationFlags)
+    postKey(OPTION_KEY, False)
+    postKey(COMMAND_KEY, False)
 
 
 class ActionExecutor:
@@ -89,10 +131,7 @@ class ActionExecutor:
 
     def switchBrowserTab(self, isPreviousTab: bool) -> None:
         """Post native browser next or previous tab shortcut events."""
-        command = [SWIFT_EXECUTABLE, str(TAB_CONTROL_SCRIPT_PATH)]
-        if isPreviousTab:
-            command.append("--previous")
-        self.commandRunner(command, check=True)
+        postBrowserTabShortcut(isPreviousTab)
 
     def lockScreen(self) -> None:
         """Post macOS's native Control-Command-Q lock shortcut."""
