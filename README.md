@@ -133,6 +133,8 @@ samples for gestures you train locally and uses a scikit-learn KNN classifier to
 recognise them. A background detection loop looks up the matched gesture in a
 local JSON mapping file and executes its assigned macOS action.
 
+[Watch the Gesto demo on YouTube](https://youtu.be/rXrN-HKOFu0?si=IskB0s-7azIXYl1j)
+
 The usual workflow is shown below.
 
 ### 1. Train a custom gesture
