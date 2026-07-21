@@ -170,6 +170,37 @@ recognition tips, and local privacy. Ideally you should read this first.
 - **Bandit**: static security analysis.
 - **GitHub Actions**: runs the project checks on pushes and pull requests.
 
+## Key Architectural Decisions Made
+
+### 1. Local-first processing
+
+Camera frames, landmarks, trained models, and mappings never leave the Mac.
+There is no backend dependency. We chose not to have a backend because gesture
+recognition does not need remote computation, accounts, or synchronisation for
+this single-device workflow. Keeping processing local also reduces latency,
+removes network failure points, and makes the privacy boundary easy to explain.
+
+We also chose not to use a database. Gesto is a local desktop app with a small
+amount of single-user configuration, so a database would add setup, migrations,
+and another failure point without providing a useful benefit. JSON is sufficient
+for mappings and settings, while Joblib stores the trained KNN models.
+
+### 2. User-trained gestures instead of hardcoded gesture labels
+
+MediaPipe extracts 21 hand landmarks, while Gesto's own KNN models recognise
+gestures trained by each user. We did not rely on MediaPipe's built-in gesture
+labels because they are a fixed, limited vocabulary and cannot learn a user's
+personal poses or names. Separating landmark extraction from gesture
+classification lets users train, retrain, and map any static pose without
+changing application code.
+
+### 3. Local persistence outside the app bundle
+
+Mappings and models live under `~/.gesto/`, so replacing or updating
+`Gesto.app` does not erase the user's setup. The configuration is stored in
+`~/.gesto/config.json`, and each trained gesture model is stored under
+`~/.gesto/models/`.
+
 ## Architecture Diagram
 
 ```text
