@@ -23,7 +23,7 @@ but do not close the app. When you want to stop using gestures, select **Stop
 Detection** and close Gesto, or simply close the app; closing it stops
 detection.
 
-## Setup on macOS
+## Setup on macOS (if you want to try out the app quickly, look at the download instructions instead)
 
 Gesto requires **Python 3.12** to run from source or build the app. It is not
 tested with older or newer Python versions. Check whether it is available:
