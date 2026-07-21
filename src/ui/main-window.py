@@ -175,8 +175,8 @@ class MainWindow(ctk.CTk):
                 "open-app: Opens the named macOS application.\n"
                 "media-play-pause: Sends macOS's global play or pause "
                 "command.\n"
-                "switch-tab-next: Moves to the next browser tab.\n"
-                "switch-tab-previous: Moves to the previous browser tab.\n"
+                "switch-tab-next: Moves to the next Chrome tab.\n"
+                "switch-tab-previous: Moves to the previous Chrome tab.\n"
                 "lock-screen: Immediately locks your Mac."
             ),
         )
