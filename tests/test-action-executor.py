@@ -96,8 +96,14 @@ def test_tabControlUsesMacBrowserTabNavigationShortcut() -> None:
 
     assert "let rightArrowKey: CGKeyCode = 124" in script
     assert "let leftArrowKey: CGKeyCode = 123" in script
+    assert "let commandKey: CGKeyCode = 55" in script
+    assert "let optionKey: CGKeyCode = 58" in script
+    assert "postKey(commandKey, true)" in script
+    assert "postKey(optionKey, true)" in script
+    assert "postKey(optionKey, false)" in script
+    assert "postKey(commandKey, false)" in script
     assert "let navigationModifiers: CGEventFlags" in script
-    assert "event.flags = navigationModifiers" in script
+    assert "flags: navigationModifiers" in script
 
 
 def test_executeActionLocksTheScreen() -> None:
