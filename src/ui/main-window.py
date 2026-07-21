@@ -169,6 +169,20 @@ class MainWindow(ctk.CTk):
         self.addGuideSection(
             guideFrame,
             2,
+            "Available actions",
+            (
+                "take-screenshot: Saves a screenshot to your Desktop.\n"
+                "open-app: Opens the named macOS application.\n"
+                "media-play-pause: Sends macOS's global play or pause "
+                "command.\n"
+                "switch-tab-next: Moves to the next Chrome tab.\n"
+                "switch-tab-previous: Moves to the previous Chrome tab.\n"
+                "lock-screen: Immediately locks your Mac."
+            ),
+        )
+        self.addGuideSection(
+            guideFrame,
+            4,
             "Train a custom gesture",
             (
                 "Select Train a custom gesture, name the pose, then hold it "
@@ -179,7 +193,7 @@ class MainWindow(ctk.CTk):
         )
         self.addGuideSection(
             guideFrame,
-            4,
+            6,
             "Make recognition reliable",
             (
                 "Keep the same finger pose throughout training. During the 40 "
@@ -192,7 +206,7 @@ class MainWindow(ctk.CTk):
         )
         self.addGuideSection(
             guideFrame,
-            6,
+            8,
             "Retrain a gesture",
             (
                 "Select a saved gesture and choose Retrain. Capture the same "
@@ -204,7 +218,7 @@ class MainWindow(ctk.CTk):
         )
         self.addGuideSection(
             guideFrame,
-            8,
+            10,
             "100% Privacy",
             (
                 "Camera frames, landmarks, and trained models stay on your "
