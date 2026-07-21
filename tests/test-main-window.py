@@ -164,6 +164,6 @@ def test_mainWindowProvidesTrainingGuideTab() -> None:
     assert "Opens the named macOS application." in source
     assert "Sends macOS's global play or pause " in source
     assert '"command.\\n"' in source
-    assert "Moves to the next browser tab." in source
-    assert "Moves to the previous browser tab." in source
+    assert "Moves to the next Chrome tab." in source
+    assert "Moves to the previous Chrome tab." in source
     assert "Immediately locks your Mac." in source
