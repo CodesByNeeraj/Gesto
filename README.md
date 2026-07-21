@@ -113,6 +113,42 @@ samples for gestures you train locally and uses a scikit-learn KNN classifier to
 recognise them. A background detection loop looks up the matched gesture in a
 local JSON mapping file and executes its assigned macOS action.
 
+The usual workflow is shown below.
+
+### 1. Train a custom gesture
+
+![Train a custom gesture](assets/train-custom-gesture-1.png)
+
+Select **Train a custom gesture**, then give the pose a name. Detection must be
+stopped before training can begin.
+
+![Capture custom gesture samples](assets/train-custom-gesture-2.png)
+
+Hold the pose in view while Gesto captures 40 valid hand-landmark samples. A
+sample counts only when MediaPipe can see a hand.
+
+### 2. Map the gesture to an action
+
+![Map a gesture to an action](assets/map-to-action-3.png)
+
+Select the trained gesture, choose an action, and save the mapping. For
+`open-app`, select an installed app or type its name.
+
+### 3. Start detection and use the gesture
+
+![Detect a hand gesture](assets/detect-hand-gesture-4.png)
+
+Select **Start Detection** and present the trained pose. Gesto extracts the
+live landmarks, compares them with the saved KNN models, and runs the mapped
+action.
+
+### 4. Use the in-app Guide
+
+![Gesto Guide](assets/guide-5.png)
+
+Open **Guide** for explanations of the available actions, training, retraining,
+recognition tips, and local privacy. Ideally you should read this first.
+
 ## Tech stack
 
 ### Core application
