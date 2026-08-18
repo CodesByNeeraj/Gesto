@@ -13,7 +13,6 @@ MIN_CUSTOM_GESTURE_SAMPLES = 20
 DEFAULT_NEIGHBORS = 3
 LANDMARK_COUNT = 21
 MIN_DISTANCE_THRESHOLD = 0.05
-SIMILARITY_DISTANCE_MULTIPLIER = 2.0
 
 
 def trainCustomGesture(
@@ -73,31 +72,6 @@ def listCustomGestureLabels(
         normalizeGestureLabel(modelPath.stem) for modelPath in modelPaths
     }
     return sorted(labels)
-
-
-def findSimilarGesture(
-    landmarkSamples: list[list[Any]],
-    modelDirectory: Path = MODEL_DIRECTORY,
-) -> str | None:
-    """Return an existing label when new samples are too similar to it."""
-    if not landmarkSamples or not modelDirectory.exists():
-        return None
-
-    candidateCentroid = calculateCentroid(
-        [normalizeLandmarks(landmarks) for landmarks in landmarkSamples]
-    )
-    for modelPath in modelDirectory.glob("*.joblib"):
-        savedModel = loadCustomGestureModel(modelPath)
-        centroidDistance = float(
-            np.linalg.norm(candidateCentroid - savedModel["centroid"])
-        )
-        similarityThreshold = (
-            savedModel["distanceThreshold"] * SIMILARITY_DISTANCE_MULTIPLIER
-        )
-        if centroidDistance <= similarityThreshold:
-            return str(savedModel["gestureLabel"])
-
-    return None
 
 
 def detectCustomGesture(
