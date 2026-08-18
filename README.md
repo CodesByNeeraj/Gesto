@@ -2,18 +2,19 @@
 
 ## Table of Contents
 
-- [What is Gesto?](#what-is-gesto)
-- [Download the app](#download-the-app)
-- [Setup on macOS (Developer)](#setup-on-macos-if-you-want-to-try-out-the-app-quickly-look-at-the-download-instructions-instead)
-- [Who Gesto is for](#who-gesto-is-for)
-- [What does Gesto solve?](#what-does-gesto-solve)
-- [Features](#features)
-- [Product Walkthrough](#product-walkthrough)
-- [Tech Stack](#tech-stack)
-- [Key Architectural Decisions Made](#key-architectural-decisions-made)
-- [Architecture Diagram](#architecture-diagram)
-- [Privacy & Security](#privacy--security)
-- [Built for OpenAI Codex Hackathon](#openai-build-week-hackathon)
+1. [What is Gesto?](#what-is-gesto)
+2. [Download the app](#download-the-app)
+3. [Setup on macOS (Developer)](#setup-on-macos-if-you-want-to-try-out-the-app-quickly-look-at-the-download-instructions-instead)
+4. [Who Gesto is for](#who-gesto-is-for)
+5. [What does Gesto solve?](#what-does-gesto-solve)
+6. [Features](#features)
+7. [Product Walkthrough](#product-walkthrough)
+8. [Tech Stack](#tech-stack)
+9. [Key Architectural Decisions Made](#key-architectural-decisions-made)
+10. [Architecture Diagram](#architecture-diagram)
+11. [View PRD](#view-prd)
+12. [Privacy & Security](#privacy--security)
+13. [Built for OpenAI Codex Hackathon](#openai-build-week-hackathon)
 
 ## What is Gesto?
 
@@ -339,6 +340,10 @@ USER USE: DETECT A GESTURE AND RUN ITS ACTION
                  │ Continue detection  │
                  ╰─────────────────────╯
 ```
+
+## View PRD
+
+Read the full [Gesto PRD](https://docs.google.com/document/d/174EP9r867G0eX7LW2_OEB46dCYfmDTFjyUYWerSu6k4/edit?usp=drive_link).
 
 ## Privacy & Security
 
