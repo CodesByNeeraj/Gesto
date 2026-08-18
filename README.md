@@ -1,5 +1,22 @@
 # Gesto
 
+## Table of Contents
+
+- [What is Gesto?](#what-is-gesto)
+- [Download the app](#download-the-app)
+- [Setup on macOS (Developer)](#setup-on-macos-if-you-want-to-try-out-the-app-quickly-look-at-the-download-instructions-instead)
+- [Who Gesto is for](#who-gesto-is-for)
+- [What does Gesto solve?](#what-does-gesto-solve)
+- [Features](#features)
+- [Product Walkthrough](#product-walkthrough)
+- [Tech Stack](#tech-stack)
+- [Key Architectural Decisions Made](#key-architectural-decisions-made)
+- [Architecture Diagram](#architecture-diagram)
+- [Privacy & Security](#privacy--security)
+- [Built for OpenAI Codex Hackathon](#openai-build-week-hackathon)
+
+## What is Gesto?
+
 Your gestures, your rules. Gesto is a local macOS app for mapping hand gestures
 you train yourself to useful computer actions.
 
@@ -104,12 +121,14 @@ before relying on its actions:
   show the Camera prompt. Choose **Allow**. If you denied it, enable Gesto
   under **Camera** in System Settings.
 
-## Who it is for
+## Who Gesto is for
 
-For anyone who wants a personalised shortcut layer without memorising more key
-combinations.
+Gesto is an experimental build. It all started with a thought: "What if I
+could control my laptop using just hand gestures to perform actions faster?"
+Therefore, Gesto is for anyone who wants a personalised shortcut layer without
+having to memorise more key combinations.
 
-## What it solves
+## What does Gesto solve?
 
 Opening an app, pausing/playing media, switching tabs, or taking a screenshot
 is quick once. Repeating those interruptions breaks focus. Gesto lets you
@@ -126,7 +145,7 @@ it from your laptop camera.
 - Use confidence thresholds and a cooldown to reduce accidental triggers.
 - Keep camera frames, landmarks, trained models, and mappings on your Mac.
 
-## How it works
+## Product Walkthrough
 
 MediaPipe extracts 21 hand landmarks from each camera frame. Gesto stores the
 samples for gestures you train locally and uses a scikit-learn KNN classifier to
@@ -321,7 +340,7 @@ USER USE: DETECT A GESTURE AND RUN ITS ACTION
                  ╰─────────────────────╯
 ```
 
-## Privacy
+## Privacy & Security
 
 Camera frames, landmarks, and trained models stay on your Mac. Gesto neither
 collects nor uploads them to backend servers. Detection runs only after you
